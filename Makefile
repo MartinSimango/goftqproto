@@ -1,0 +1,6 @@
+build:
+	go build ./...
+	# add instructions for compiling C files
+install: build
+	go install ./...
+run: build
