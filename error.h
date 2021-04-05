@@ -20,6 +20,9 @@ const char * FAILED_TO_CLOSE_FILE = "Failed to close file!";
 const char * FAILED_TO_READ_FROM_FILE = "Failed to read from file!";
 const char * FAILED_TO_WRITE_TO_FILE = "Failed to write to file!";
 
+//SERVER ERRORS
+const char * SERVER_NOT_RUNNING = "The server is not running!";
+const char * FAILED_TO_READ_CLIENT_REQUEST= "Failed to read client request!";
 
 
 #endif

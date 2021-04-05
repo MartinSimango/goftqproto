@@ -1,27 +1,22 @@
 #include "Server.hpp"
-#include <iostream>
 
-using namespace fileServer;
-using namespace std;
 
-int main(){
+using namespace fts;
 
-    
-    FileServer fileServer(3000);
+// Connect connects the client to the specific server
+bool FileServer::StartServer(int connections){
+    return isRunning = createServer() && !listen(sockfd, connections);
+}
 
-    if(!fileServer.StartServer(5)){
-        cout << "Failed to start server" <<endl;
-        return -1;
-    }
-    
-    if(!fileServer.Accept()){
-        cout << "Failed to read from client" <<endl;
-        return -1;
+bool FileServer::Accept(){
+    if(!isRunning){
+        errorMessage = SERVER_NOT_RUNNING;
+        return false;
     }
 
-    fileServer.Close();
-
-    cout << "Program succeeded" << endl;
-    return 0;
-
+    struct sockaddr_in client;
+    int len = sizeof(client);
+    connfd = accept(sockfd, (struct sockaddr*)&client, (socklen_t *) &len);
+    
+    handleClientRequst();
 }

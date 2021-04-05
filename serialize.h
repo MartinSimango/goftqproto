@@ -18,35 +18,39 @@
 #define PERMISION_DENIED 2
 //statuses 
 
+// TODO seperate different functions to seperate files as file is getting quite large
 
 // TODO: reorder struct memebers to decrease file size
+// TODO: make an absract class/struct called Packet that has one abstract method called getType which just returns a constant of
+// what class it is
 struct FilePacket {
 
-    int offset; // where to start writing in the file
-    int bytes_rw; // number of bytes read or written TODO might just rename to bytes read
-    bool mode; 
-    char filename[FILEPATH_MAX_LENGTH]; //file 
+    int bytesRead; // number of bytes read 
     char data[TRANSFER_DATA_SIZE]; //data to be written
 
+    FilePacket(){}
+    FilePacket(char * data, int offset, int bytesRead) {
+        strcpy(this->data, data);
+        this->bytesRead = bytesRead;
+    }
 };
+    
 
-struct FileReadWritePacket {
+struct FileReadPacket {
     int offset; // where to start reading
-    int bytesToReadWrite; //max number of bytes to read or write
-    char filename[FILEPATH_MAX_LENGTH]; //file to read
-
+    int numberOfBytesToRead; //max number of bytes to read
 };
 
 struct RequestPacket {
     bool mode;
     char filename[FILEPATH_MAX_LENGTH];
-
-
+ 
 };
 
 struct ResponsePacket {
     unsigned char status;
 };
+
 
 //Below functions are based from https://stackoverflow.com/questions/1577161/passing-a-structure-through-sockets-in-c
 
@@ -130,15 +134,21 @@ inline unsigned char * deserialize_char(unsigned char *buffer, char* value)
 
 inline unsigned char * serialize_file_packet(unsigned char *buffer, struct FilePacket * packet)
 {
-  buffer = serialize_int_big_endian(buffer, packet->offset); //returns a pointer after the end of the before
-  buffer = serialize_int_big_endian(buffer, packet->bytes_rw);
-  buffer = serialize_char(buffer, packet->mode);
-  buffer = serialize_char_array(buffer, packet->filename);
+  buffer = serialize_int_big_endian(buffer, packet->bytesRead);
   buffer = serialize_char_array(buffer, packet->data);
 
   return buffer; //this is a pointer at the end of buffer
 }
 
+inline unsigned char * deserialize_file_packet(unsigned char *buffer, struct FilePacket * packet) {
+    //get the first four bytes of the buffer
+    
+  buffer = deserialize_int_big_endian(buffer, &(packet->bytesRead));
+  buffer = deserialize_char_array(buffer, packet->data);
+
+  return buffer;
+
+}
 
 inline unsigned char * serialize_request_packet(unsigned char *buffer, struct RequestPacket * packet)
 {
@@ -148,24 +158,19 @@ inline unsigned char * serialize_request_packet(unsigned char *buffer, struct Re
   return buffer; //this is a pointer at the end of buffer
 }
 
-inline unsigned char * serialize_respone_packet(unsigned char *buffer, struct ResponsePacket * packet)
+inline unsigned char * serialize_response_packet(unsigned char *buffer, struct ResponsePacket * packet)
 {
   buffer = serialize_char(buffer, packet->status); //returns a pointer after the end of the before
 
   return buffer; //this is a pointer at the end of buffer
 }
 
-inline unsigned char * deserialize_file_packet(unsigned char *buffer, struct FilePacket * packet) {
-    //get the first four bytes of the buffer
-    
-  buffer = deserialize_int_big_endian(buffer, &(packet->offset)); //returns a pointer after the end of the before
-  buffer = deserialize_int_big_endian(buffer, &(packet->bytes_rw));
-  buffer = deserialize_char(buffer, (char *) &(packet->mode));
-  buffer = deserialize_char_array(buffer, packet->filename);
-  buffer = deserialize_char_array(buffer, packet->data);
-
+inline unsigned char * serialize_file_read_packet(unsigned char *buffer, struct FileReadPacket * packet){
+  
+  buffer = serialize_int_big_endian(buffer, packet->offset);
+  buffer = serialize_int_big_endian(buffer, packet->numberOfBytesToRead);
   return buffer;
-
+  
 }
 
 inline unsigned char * deserialize_request_packet(unsigned char *buffer, struct RequestPacket * packet)
@@ -183,18 +188,83 @@ inline unsigned char * deserialize_response_packet(unsigned char *buffer, struct
   return buffer; //this is a pointer at the end of buffer
 }
 
+inline unsigned char * deserialize_file_read_packet(unsigned char *buffer, struct FileReadPacket * packet){
+  
+  buffer = deserialize_int_big_endian(buffer, &(packet->offset));
+  buffer = deserialize_int_big_endian(buffer, &(packet->numberOfBytesToRead));
+  return buffer;
+  
+}
+
 inline int get_size_of_request_packet(struct RequestPacket * packet){
     return sizeof(packet->mode) + strlen(packet->filename) + 1; // +1 to accomodate for '\0' character
 }
 
 
 inline int get_size_of_file_packet(struct FilePacket * packet){
-    return sizeof(packet->bytes_rw) + sizeof(packet->offset) + sizeof(packet->mode) +
-           strlen(packet->data) + 1 + strlen(packet->filename) + 1; // +1 to accomodate for '\0' character
+    return sizeof(packet->bytesRead) +
+           strlen(packet->data) + 1; // +1 to accomodate for '\0' character
 }
 
-inline int write_serialized_data(int fd, unsigned char * buffer, unsigned char * ptr) {           
+inline int get_size_of_file_read_packet(struct FileReadPacket * packet){
+    return sizeof(packet->offset) + sizeof(packet->numberOfBytesToRead);
+}
+
+// TODO generalize these read and write functions so as to take in a (void *) struct in order to use one function for reading/writing
+
+inline int write_serialized_file_packet(int fd, struct FilePacket * packet) {
+    
+    unsigned char buffer[get_size_of_file_packet(packet)];  //buffer will point to the start of the array of data bytes to be written and is where data is stored
+    unsigned char *ptr; //ptr will point to the end of the array of data bytes to be written 
+
+    ptr = serialize_file_packet(buffer, packet);
+
+    return write(fd, buffer, ptr - buffer);   
+
+}
+
+inline int write_serialized_file_read_packet(int fd, struct FileReadPacket * packet){
+
+    unsigned char buffer[get_size_of_file_read_packet(packet)]; 
+    unsigned char *ptr; 
+
+    ptr = serialize_file_read_packet(buffer, packet);
+
     return write(fd, buffer, ptr - buffer);   
 }
+
+// read_and_deserialize_file_packet reads from the file descriptor fd and des
+inline int read_and_deserialize_file_packet(int fd, struct FilePacket * packet) {
+    
+    unsigned char buffer[TRANSFER_DATA_SIZE];  //buffer will point to the start of the array of data bytes to be written and is where data is stored
+    unsigned char *ptr; //ptr will point to the end of the array of data bytes to be written 
+
+    int bytesRead = read(fd, buffer, sizeof(buffer));
+    
+    deserialize_file_packet(buffer, packet);
+    return bytesRead;
+}
+
+// read_serialized_file_packet reads from the file descriptor fd and des
+inline int read_and_deserialize_file_read_packet(int fd, struct FileReadPacket * packet) {
+    
+    unsigned char buffer[get_size_of_file_read_packet(packet)];  //buffer will point to the start of the array of data bytes to be written and is where data is stored
+    unsigned char *ptr; //ptr will point to the end of the array of data bytes to be written 
+
+    int bytesRead = read(fd, buffer, sizeof(buffer));
+    
+    deserialize_file_read_packet(buffer, packet);
+    return bytesRead;
+}
+
+// inline int write_request_packet
+
+// // unsigned char buffer[get_size_of_request_packet(&requestPacket)];
+// //             unsigned char *ptr;
+
+// //             serialize_request_packet(buffer ,&requestPacket);
+// //             if (write_serialized_data(sockfd, buffer, ptr) < 0) {
+// //                 return false;
+// //             }
 
 #endif

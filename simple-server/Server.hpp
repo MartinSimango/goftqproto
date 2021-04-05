@@ -7,9 +7,10 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include "../serialize.h"
-#include "../FileReadWriter.hpp"
+#include "../simple-file-read-writer/FileReadWriter.hpp"
+#include "../error.h"
 
-namespace fileServer {
+namespace fts {
 
 
 struct ServerPort {
@@ -26,6 +27,9 @@ class FileServer {
     int sockfd;
     int connfd;
     int port;
+    struct RequestPacket clientRequest;
+    const char * errorMessage;
+
     
 
     // TODO be able to have protocol specificied
@@ -50,54 +54,98 @@ class FileServer {
         struct sockaddr_in servaddr;
 
         if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
+            errorMessage = FAILED_TO_CREATE_SOCKET;
             return false;
         }
 
         return createAndBindServerAddress(&servaddr);
     }
 
-    inline int readFromClient(){
-        
-        struct FilePacket packet;
 
-        unsigned char buff[sizeof(struct FilePacket)];
-		bzero(buff, sizeof(struct FilePacket));
+    //read from server, then write to client
+    inline int writeToClient(char *filename){
+
+        
+        struct FileReadPacket rw_packet;
+
+        unsigned char buffer[sizeof(rw_packet)];
+		bzero(buffer, sizeof(buffer)); 
+
+        read(connfd, buffer, sizeof(buffer));
+
+        
+        frw = new FileReadWriter(filename, READ);
+        if(frw->Open() < 0){
+            return -1; // TODO add error to file packet to speficy error message
+        }
+
 
 		// read the message from client and copy it in buffer
 		read(connfd, buff, sizeof(struct FilePacket));
         
         deserialize_file_packet(buff, &packet);
+    
+
         
-        printf("\nOVER\n");
-        printf("HER: %i\n", packet.bytes_rw);
-        printf("HER: %s\n", packet.data);
-        printf("HER: %s\n", packet.filename);
-        printf("HER: %d\n", packet.mode);
-        printf("HER: %d\n", packet.offset);
 
-        frw = new FileReadWriter("test.txt", packet.mode);
-        if(frw->Open() < 0){
-            return -1; // TODO add error to file packet to speficy error message
+      
+        if ((packet.bytes_rw = frw->ReadFromFile(packet.data, sizeof(packet.data), packet.offset)) < 0 ){
+            errorMessage = FAILED_TO_READ_FROM_FILE;
+            return -1;
         }
+        
+        unsigned char buffer[sizeof(struct FilePacket)];  //buffer will point to the start of the array of data bytes to be written and is where data is stored
+        unsigned char *ptr; //ptr will point to the end of the array of data bytes to be written 
 
-        if (packet.mode == READ){
-            //read data from file then write back to cleint
-          
-            if ((packet.bytes_rw = frw->ReadFromFile(packet.data, sizeof(packet.data), packet.offset)) < 0 ){
-                return -1;
-            }
-            return WriteToClient(&packet);
-        }
-        else {
-            printf("SDF!!");
-            frw->WriteToFile(packet.data, packet.bytes_rw, packet.offset);
-            frw->Close();
-            //write data baxk to client to tell it what was done 
-            return WriteToClient(&packet);
-        }
+        ptr = serialize_file_packet(buffer, &packet);
+        return WriteToClient(&packet);
+       
     }
 
+ 
+    inline int checkFileForRead(char * filename, struct ResponsePacket *response){
+        if (access(filename, F_OK) == 0) {
+            response->status = access(filename, R_OK) == 0 ? OK : PERMISION_DENIED;
+        }
+        else {
+            response->status = FILE_NOT_FOUND;
+        }
+    }    
 
+    inline int checkFileForWrite(char * filename, struct ResponsePacket *response){
+        response->status = access(filename, W_OK) == 0 ? OK : PERMISION_DENIED;
+    }
+      
+
+    
+    inline bool handleClientRequst(struct ResponsePacket *response){
+
+        struct ResponsePacket response;
+        unsigned char buffer[get_size_of_request_packet(&clientRequest)];
+        unsigned char * ptr;
+        
+        if (read(connfd, buffer, sizeof(buffer))) {
+            return false;
+        }
+
+        deserialize_request_packet(buffer, &clientRequest);
+        if (clientRequest.mode == READ) {
+             checkFileForRead(clientRequest.filename, response);
+        } 
+        else {
+             checkFileForWrite(clientRequest.filename, response);
+
+        }
+
+        bzero(&buffer, sizeof(buffer));
+        ptr = serialize_response_packet(buffer, response);
+        if (write_serialized_data(connfd, buffer, ptr) < 0) {
+            errorMessage = FAILED_TO_WRITE_TO_CLIENT_SOCKET;
+            return false;
+        }
+
+        return true;
+    }
 
     public:
 
@@ -105,16 +153,31 @@ class FileServer {
     FileServer(int port): port(port){}
 
     // Connect connects the client to the specific server
-    bool StartServer(int connections){
-        return isRunning = createServer() && !listen(sockfd, connections);
-    }
+    bool StartServer(int connections);
 
     bool Accept(){
-        struct sockaddr_in  client;
+        if(!isRunning){
+            errorMessage = SERVER_NOT_RUNNING;
+            return false;
+        }
+
+        struct sockaddr_in client;
         int len = sizeof(client);
-        connfd = accept(sockfd, (struct sockaddr*)&client,(socklen_t *) &len);
-        printf("CET");
-        return readFromClient() == -1;
+        connfd = accept(sockfd, (struct sockaddr*)&client, (socklen_t *) &len);
+        
+        struct ResponsePacket response;
+
+        if(!handleClientRequst(&response)) {
+            errorMessage = FAILED_TO_READ_CLIENT_REQUEST;
+            return false;
+        }
+        if(response.status == OK){
+            if(clientRequest.mode == READ){
+                writeToClient(clientRequest.filename); //read from server file and send to server
+            }
+
+        }
+
     }
      // writeToServer writes to the server
 
