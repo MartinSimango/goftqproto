@@ -9,7 +9,14 @@
 #include "../serialize.h"
 #include "../simple-file-read-writer/FileReadWriter.hpp"
 #include "../error.h"
+#include "../Packet/RequestPacket.hpp"
+#include "../Packet/ResponsePacket.hpp"
+#include "../Packet/FileConfigPacket.hpp"
+#include "../Packet/FilePacket.hpp"
 
+
+
+using namespace packet;
 namespace ftc {
 
 
@@ -22,19 +29,19 @@ namespace ftc {
     class FileClient {
         
         private:
-
-        struct ServerPort * serverPort;
-        struct RequestPacket requestPacket;
         bool isConnected;
+        bool mode;
         int sockfd;
         const char * errorMessage;
+        char requestFileName[MAX_FILEPATH_LENGTH];
         FileReadWriter *frw;
+
         
 
         // TODO be able to have protocol specificied
 
         // connectToServer to the connects to the server specified by serverPort
-        inline bool connectToServer(){
+        inline bool connectToServer(struct ServerPort serverPort){
             
             struct sockaddr_in servaddr;
 
@@ -45,8 +52,8 @@ namespace ftc {
 
             bzero(&servaddr, sizeof(servaddr));
             servaddr.sin_family = AF_INET;
-            servaddr.sin_addr.s_addr = inet_addr(serverPort->serverAddress);
-            servaddr.sin_port = htons(serverPort->port);
+            servaddr.sin_addr.s_addr = inet_addr(serverPort.serverAddress);
+            servaddr.sin_port = htons(serverPort.port);
             
             if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) != 0) {
                 errorMessage = FAILED_TO_CONNECT_TO_SERVER;
@@ -58,16 +65,19 @@ namespace ftc {
         // requestToServer makes a request to the server to see if it can read or write to the server
         inline bool requestToServer(){
             
-            struct ResponsePacket responsePacket;
+            RequestPacket requestPacket(sockfd, mode, requestFileName);
+            
+            if (requestPacket.WritePacket() < 0){
+                return false;
+            }
 
-            write_serialized_request_packet
-            bzero(&buffer, sizeof(buffer));
+            ResponsePacket responsePacket(sockfd);
+            if (responsePacket.ReadIntoPacket() < 0){
+
+                return false;
+            }
 
             //read back what server says
-            read(sockfd, buffer, sizeof(struct ResponsePacket));
-
-            deserialize_response_packet(buffer, &responsePacket);
-
             if (responsePacket.status == OK){
                 return true;
             }
@@ -85,61 +95,50 @@ namespace ftc {
             return true;
         }
 
-        inline int readFromFile(char * buffer, struct FileReadPacket *readPacket) {
-            return frw->ReadFromFile(buffer, readPacket->numberOfBytesToRead, readPacket->offset);
+        inline int readFromFile(char * buffer, FileConfigPacket * fileConfigPacket) {
+            return frw->ReadFromFile(buffer, fileConfigPacket->numberOfBytesToRead, fileConfigPacket->offset);
         }
-        inline int writeToFile(char *buffer, struct FileReadPacket *writePacket) {
-            return frw->WriteToFile(buffer, sizeof(buffer), writePacket->offset); 
+        inline int writeToFile(char *buffer, int bytesToWrite, int offset) {
+            return frw->WriteToFile(buffer, bytesToWrite, offset); 
         }
 
          // writeToServer writes to the server and reads from the client, returns false upon failure
-        inline bool writeToServer(struct FileReadPacket *readPacket){
-
-            char dataRead[readPacket->numberOfBytesToRead];
+        inline int writeToServer(FileConfigPacket *fileConfigPacket){
+            char dataRead[fileConfigPacket->numberOfBytesToRead];
             int numberOfBytesRead;
 
-            if ( (numberOfBytesRead = readFromFile(dataRead, readPacket) ) < 0)  {
+            if ( (numberOfBytesRead = readFromFile(dataRead, fileConfigPacket) ) < 0) {
                 return false;
             }
-
             //TODO accomdate for when data is finished being raed
-
-            struct FilePacket packet(dataRead, readPacket->offset, numberOfBytesRead);
-
-            if (write_serialized_file_packet(sockfd, &packet) < 0) {
-                return false;
-            }
-
-            // TODO add check for when server responds
-            return true;
+            //write file packet to server
+            FilePacket packet(sockfd, dataRead, numberOfBytesRead, fileConfigPacket->offset);     
+            return packet.WritePacket();       
         }
         
         // ReadFromServer reads from the server and writes to the client, returns false upon failure
 
-        inline bool FileClient::readFromServer(struct FileReadPacket * readPacket){
+        inline int readFromServer(struct FileConfigPacket * fileConfigPacket){
 
             //write to server to tell where to start getting data from
-            if(write_serialized_file_read_packet(sockfd, readPacket) < 0){
+            if (fileConfigPacket->WritePacket() < 0){
                 return false;
-            }
-    
-            struct FilePacket packet;
-            if(read_and_deserialize_file_packet(sockfd, &packet) < 0) {
-                return false;
-            }
+            }           
 
+            FilePacket packet(sockfd);            
+            packet.ReadIntoPacket();
+            //TODO accomodate for error
 
-            return writeToFile(packet.data, readPacket);        
-
+            return writeToFile(packet.data, packet.numberOfBytesRead, packet.offset);        
         }
 
         public:
 
         // if writing to server filename will be file we want to read from
         // if reading from server filename will be file we want to write to
-        FileClient(struct RequestPacket requestPacket, char * filename = nullptr): errorMessage(nullptr), requestPacket(requestPacket) {
-            frw = new FileReadWriter( (!filename) ? requestPacket.filename : filename, !requestPacket.mode); // ! request.mode because if you are writing to server you are reading from client
-           
+        FileClient(bool mode, char * requestFileName, char * filename = nullptr): errorMessage(nullptr), mode(mode) {
+            frw = new FileReadWriter( (!filename) ? requestFileName : filename, !mode); // ! request.mode because if you are writing to server you are reading from client
+            strcpy(this->requestFileName, requestFileName);
         }
 
         ~FileClient() {
@@ -147,12 +146,14 @@ namespace ftc {
                 delete frw;
             }
         }
+
         // Connect connects the client to the specific server specified by the ServerPort 
         // returns false if connect failed and errorMessage is set
-        bool Connect(struct ServerPort *serverPort);
+        bool Connect(struct ServerPort serverPort);
         
         // Process either reads or writes to the server depending on what mode the FileClient is in
-        bool Process(struct FileReadPacket * packet);
+        // returns the number of bits written or read to the server depending on the mode
+        int Process(int offset, int numberOfBytesRead);
 
         // GetErrorMessge returns the errorMessage 
         const char * GetErrorMessage() const;

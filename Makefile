@@ -8,11 +8,21 @@
 
 build: server client
 
+build-no-warning: server-nw client-nw
+
 run: 
 	./server && ./client
 
-server: FileReadWriter.hpp serialize.h simple-server/Server.hpp 
-	g++ -o server simple-server/Server.cpp
+server: simple-server/* Packet/* simple-file-read-writer/* serialize.h error.h
+	g++ -o server simple-server/Server.cpp simple-file-read-writer/FileReadWriter.cpp
 
-client: FileReadWriter.hpp simple-client/Client.hpp serialize.h 
+client: simple-client/* Packet/* simple-file-read-writer/* serialize.h 
 	g++ -o client simple-client/Client.cpp
+
+server-nw: simple-server/* Packet/* simple-file-read-writer/* serialize.h error.h
+	g++ -o server simple-server/Server.cpp simple-file-read-writer/FileReadWriter.cpp simple-server/server_test.cpp -w
+
+
+client-nw: simple-client/* Packet/* simple-file-read-writer/* serialize.h 
+		g++ -o client simple-client/Client.cpp simple-file-read-writer/FileReadWriter.cpp simple-client/client_test.cpp -w
+

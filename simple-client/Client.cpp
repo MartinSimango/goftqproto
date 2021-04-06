@@ -3,29 +3,22 @@
 using namespace ftc;
 
 
-
-bool FileClient::Connect(struct ServerPort *serverPort){
+bool FileClient::Connect(struct ServerPort serverPort){
     if (isConnected){
         errorMessage = CLIENT_ALREADY_CONNECTED;
         return false;
     }
-    isConnected = connectToServer() && requestToServer() && openFile();
+    isConnected = connectToServer(serverPort) && requestToServer() && openFile();
     return isConnected;
 }
 
-bool FileClient::Process(struct FileReadPacket * packet){
-    if(isConnected){
+int FileClient::Process(int offset, int numberOfBytesRead){
+    if (!isConnected)
+        return false;
+        
+    FileConfigPacket packet(sockfd, offset, numberOfBytesRead);
 
-        if (requestPacket.mode == READ) {
-            return readFromServer(packet);
-        }
-        else {
-            return writeToServer(packet);
-        }
-    }
-    // Not connected 
-    return false;
-
+    return mode == READ ? readFromServer(&packet): writeToServer(&packet);
 }
 
 const char * FileClient::GetErrorMessage() const {
@@ -39,9 +32,6 @@ bool FileClient::Close(){
             return false;
         }
         isConnected = false;
-        if (frw){
-            delete frw;
-        }
         return true;
     }
     errorMessage = CLIENT_NOT_CONNECTED;

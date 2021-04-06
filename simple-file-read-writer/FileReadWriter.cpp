@@ -1,5 +1,5 @@
 #include "FileReadWriter.hpp"
-
+#include "../Packet/RequestPacket.hpp"
 
 bool FileReadWriter::Open(){
     fd = (mode == READ) ? openFileForReading() : openFileForWriting();

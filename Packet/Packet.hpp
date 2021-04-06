@@ -5,6 +5,7 @@
 
 #include "../serialize.h"
 
+
 namespace packet {
 
     class Packet {
@@ -32,17 +33,14 @@ namespace packet {
         }
         
         int ReadIntoPacket(){
-            
             int packetByteSize = getReadPacketSize();
             unsigned char buffer[packetByteSize]; 
-            unsigned char *ptr; //ptr will point to the end of the array of data bytes to be written 
 
             int bytesRead = read(fd, buffer, packetByteSize);
             if (bytesRead >= 0) {
                 deserializePacket(buffer);
             }
                     //TODO handle errors
-
             return bytesRead;
             
         }
@@ -56,11 +54,6 @@ namespace packet {
 
 
     
-
-// struct FileReadPacket {
-//     int offset; // where to start reading
-//     int numberOfBytesToRead; //max number of bytes to read
-// };
 
 
 

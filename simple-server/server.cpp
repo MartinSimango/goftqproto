@@ -18,5 +18,19 @@ bool FileServer::Accept(){
     int len = sizeof(client);
     connfd = accept(sockfd, (struct sockaddr*)&client, (socklen_t *) &len);
     
-    handleClientRequst();
+    return handleClientRequest() && openFile() && process();
+}
+
+bool FileServer::Close(){
+    if (isRunning) {
+        if (close(sockfd) < 0) {
+            errorMessage = FAILED_TO_CLOSE_SOCKET;
+            return false;
+        }
+        isRunning = false;
+        return true;
+    }
+    errorMessage = SERVER_NOT_RUNNING;
+    return false;
+    
 }

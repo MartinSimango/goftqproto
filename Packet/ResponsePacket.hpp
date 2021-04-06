@@ -2,14 +2,19 @@
 
 #include "Packet.hpp"
 
-using namespace packet;
+namespace packet {
 
-class ResponsePacket : Packet {
-    
-    private:
-    unsigned char status;
+//statuses 
+#define OK  0
+#define FILE_NOT_FOUND 1
+#define NO_WRITE_PERMISIONS 2
+#define NO_READ_PERMISSIONS 3
+
+class ResponsePacket : public Packet {
     
     public:
+    unsigned char status;
+
     ResponsePacket(int fd): Packet(fd) {
         packetType = RESPONSE_PACKET;
     }
@@ -30,3 +35,5 @@ class ResponsePacket : Packet {
     };
 
 };
+
+}

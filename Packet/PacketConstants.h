@@ -1,10 +1,9 @@
-#ifndef _PACKET_CONSTANTS_
-#define _PACKET_CONSTANTS_
+#pragma once
 
 #define KILOBYTE 1024
 #define MEGABYTE 1024*1024
 #define GIGABYTE 1024*1024*1024
-#define MAX_FILE_PATH_LENGTH 100
+#define MAX_FILEPATH_LENGTH 100
 #define MAX_BUFFER_SIZE MEGABYTE
 
 
@@ -14,6 +13,3 @@
 #define REQUEST_PACKET 3
 #define RESPONSE_PACKET 4
 
-
-
-#endif
