@@ -1,5 +1,5 @@
-#include "Client.hpp"
 #include <iostream>
+#include <Client.hpp>
 
 using namespace ftc;
 using namespace std;
@@ -17,7 +17,7 @@ int main(){
         exit(1);
     }
 
-    if(fileClient.Process(0,10) < 0){
+    if(fileClient.Process(2,10) < 0){
         cout << "Failed to process to server" << endl;
         exit(1);
     }

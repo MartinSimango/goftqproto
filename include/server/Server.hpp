@@ -7,13 +7,9 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include "../serialize.h"
-#include "../simple-file-read-writer/FileReadWriter.hpp"
-#include "../error.h"
-#include "../Packet/ResponsePacket.hpp"
-#include "../Packet/RequestPacket.hpp"
-#include "../Packet/FilePacket.hpp"
-#include "../Packet/FileConfigPacket.hpp"
+#include <Packets.hpp>
+#include <FileReadWriter.hpp>
+#include <Error.h>
 
 using namespace packet;
 
@@ -69,7 +65,6 @@ class FileServer {
 
         return createAndBindServerAddress(&servaddr);
     }
-
 
     //read from server, then write to client
     inline int writeToClient(){

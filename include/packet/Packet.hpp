@@ -1,10 +1,8 @@
 #pragma once
 
 #include <unistd.h>
-#include "PacketConstants.h"
-
-#include "../serialize.h"
-
+#include <PacketConstants.h>
+#include <Serializer.h>
 
 namespace packet {
 

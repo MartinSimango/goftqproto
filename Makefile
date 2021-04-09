@@ -1,28 +1,16 @@
-# build:
-# 	go build ./...
-# 	# add instructions for compiling C files
-# install: build
-# 	go install ./...
-# run: server /
-# 	 client
+CC=gcc
+CPP=g++
+CFLAGS=-std=c++11
+SUBDIRS := $(wildcard src/*)
 
-build: server client
+all: $(SUBDIRS) client server
+$(SUBDIRS):
+	$(MAKE) -C $@
 
-build-no-warning: server-nw client-nw
+.PHONY: all $(SUBDIRS)
 
-run: 
-	./server && ./client
+client: 
+	$(CPP) -o client lib/libgocpclient.a lib/libpacket.a lib/libfrw.a 
 
-server: simple-server/* Packet/* simple-file-read-writer/* serialize.h error.h
-	g++ -o server simple-server/Server.cpp simple-file-read-writer/FileReadWriter.cpp
-
-client: simple-client/* Packet/* simple-file-read-writer/* serialize.h 
-	g++ -o client simple-client/Client.cpp
-
-server-nw: simple-server/* Packet/* simple-file-read-writer/* serialize.h error.h
-	g++ -o server simple-server/Server.cpp simple-file-read-writer/FileReadWriter.cpp simple-server/server_test.cpp -w
-
-
-client-nw: simple-client/* Packet/* simple-file-read-writer/* serialize.h 
-		g++ -o client simple-client/Client.cpp simple-file-read-writer/FileReadWriter.cpp simple-client/client_test.cpp -w
-
+server:
+	$(CPP) -o server lib/libgocpserver.a lib/libpacket.a lib/libfrw.a

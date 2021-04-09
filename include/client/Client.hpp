@@ -6,13 +6,10 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include "../serialize.h"
-#include "../simple-file-read-writer/FileReadWriter.hpp"
-#include "../error.h"
-#include "../Packet/RequestPacket.hpp"
-#include "../Packet/ResponsePacket.hpp"
-#include "../Packet/FileConfigPacket.hpp"
-#include "../Packet/FilePacket.hpp"
+#include <Error.h>
+#include <FileReadWriter.hpp>
+#include <Packets.hpp>
+
 
 
 
@@ -118,7 +115,7 @@ namespace ftc {
         
         // ReadFromServer reads from the server and writes to the client, returns false upon failure
 
-        inline int readFromServer(struct FileConfigPacket * fileConfigPacket){
+        inline int readFromServer(FileConfigPacket * fileConfigPacket){
 
             //write to server to tell where to start getting data from
             if (fileConfigPacket->WritePacket() < 0){

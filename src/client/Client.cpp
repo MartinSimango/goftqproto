@@ -25,7 +25,7 @@ const char * FileClient::GetErrorMessage() const {
     return errorMessage;
 }
 
-bool FileClient::Close(){
+bool FileClient::Close() {
     if (isConnected) {
         if (close(sockfd) < 0) {
             errorMessage = FAILED_TO_CLOSE_SOCKET;
