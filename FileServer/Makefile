@@ -30,3 +30,4 @@ install:
 
 clean:
 	rm -r $(ODIR)/*
+	rm -r $(LDIR)/*

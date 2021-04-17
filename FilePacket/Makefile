@@ -25,3 +25,4 @@ build-lib:
 
 clean:
 	rm -r $(ODIR)/*
+	rm -r $(LDIR)/*
