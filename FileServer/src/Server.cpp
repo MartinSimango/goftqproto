@@ -13,7 +13,6 @@ bool FileServer::Accept(){
         errorMessage = SERVER_NOT_RUNNING;
         return false;
     }
-
     struct sockaddr_in client;
     int len = sizeof(client);
     connfd = accept(sockfd, (struct sockaddr*)&client, (socklen_t *) &len);

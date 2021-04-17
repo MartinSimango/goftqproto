@@ -14,13 +14,13 @@ FRW_DEPS = $(patsubst %, %/*, $(IDIR))
 
 FRW_DLIB_SOURCES= $(FRW_SOURCES)
 
-all: $(FRW_OBJECTS) build
+build: $(FRW_OBJECTS) build-lib
 
 
 $(FRW_OBJECTS): $(ODIR)/%.o : $(SDIR)/%.cpp $(FRW_DEPS)
 	$(CPP) -c $< -o $@ $(CFLAGS)
 
-build: $(FRW_OBJECTS)
+build-lib: $(FRW_OBJECTS)
 	ar -crs $(LDIR)/$(LIBNAME).a $(FRW_OBJECTS) #build the static library
 	$(CPP) -shared -fPIC -o $(LDIR)/$(LIBNAME).so $(FRW_OBJECTS) $(CFLAGS) #build dynamic library
 

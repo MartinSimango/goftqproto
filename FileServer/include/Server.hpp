@@ -111,6 +111,7 @@ namespace fts {
             if (mode == READ){
                 return 0;
             }
+            
             struct stat st;
             char localFile[MAX_FILEPATH_LENGTH];
             strcpy(localFile, filename);
@@ -180,9 +181,6 @@ namespace fts {
 
         const char * getErrorMessage() { return errorMessage; }
     };
-
-
-
 
 };
 

@@ -7,42 +7,51 @@ import "unsafe"
 // #include "ClientWrapper.h"
 import "C"
 
+const READ = int(C.READ)
+const WRITE = int(C.WRITE)
+
 type FileClient interface {
-	Connect(address string, port C.int) C.bool
-	Process(offset, numberOfBytesRead C.int) C.int
+	Connect(address string, port int) bool
+	Process(offset, numberOfBytesRead int) int
 	GetErrorMessage() string
-	Close() C.bool
+	Close() bool
 	Free()
 }
 type FileClientImpl struct {
 	ptr unsafe.Pointer
 }
 
+//check the FileClient is implemented
 var _ FileClient = &FileClientImpl{}
 
-func NewFileClient(mode C.int, requestFile string, filename string) FileClient {
+// NewFileClient creates a new instance of FileClient
+func NewFileClient(mode int, requestFile string, filename string) FileClientImpl {
 	var fc = FileClientImpl{}
-	fc.ptr = C.NewFileClient(mode, C.CString(requestFile), C.CString(filename))
+	fc.ptr = C.NewFileClient(C.int(mode), C.CString(requestFile), C.CString(filename))
 	return fc
 }
 
-func (fc FileClientImpl) Free() {
+// Free deallocates the memory allocataed to the FileClientImpl instance
+func (fc *FileClientImpl) Free() {
 	C.DestroyFileClient(fc.ptr)
-
 }
 
-func (fc FileClientImpl) Connect(address string, port C.int) C.bool {
-	return C.Connect(fc.ptr, C.CString("127.0.0.1"), port)
+// Close closes the connection to the server, returns false upon failure
+func (fc *FileClientImpl) Connect(address string, port int) bool {
+	return bool(C.Connect(fc.ptr, C.CString(address), C.int(port)))
 }
 
-func (fc FileClientImpl) Process(offset, numberOfBytesRead C.int) C.int {
-	return C.Process(fc.ptr, offset, numberOfBytesRead)
+// Process either reads or writes to the server depending on what mode the FileClient is in
+func (fc *FileClientImpl) Process(offset, numberOfBytesRead int) int {
+	return int(C.Process(fc.ptr, C.int(offset), C.int(numberOfBytesRead)))
 }
 
-func (fc FileClientImpl) Close() C.bool {
-	return C.Close(fc.ptr)
+// Close closes the connection to the server, returns false upon failure
+func (fc *FileClientImpl) Close() bool {
+	return bool(C.Close(fc.ptr))
 }
 
-func (fc FileClientImpl) GetErrorMessage() string {
+// GetErrorMessge returns the errorMessage
+func (fc *FileClientImpl) GetErrorMessage() string {
 	return C.GoString(C.GetErrorMessage(fc.ptr))
 }

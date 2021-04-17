@@ -14,12 +14,12 @@ PACKET_DEPS=$(patsubst %, %/*, $(IDIR))
 
 PACKET_DLIB_SOURCES=$(PACKET_SOURCES)
 
-all: $(PACKET_OBJECTS) build
+build: $(PACKET_OBJECTS) build-lib
 
 $(PACKET_OBJECTS): $(ODIR)/%.o : $(SDIR)/%.cpp $(PACKET_DEPS)
 	$(CPP) -c $< -o $@ $(CFLAGS)
 
-build:
+build-lib:
 	ar -crs $(LDIR)/$(LIBNAME).a $(PACKET_OBJECTS)
 	$(CPP) -shared -fPIC -o $(LDIR)/$(LIBNAME).so $(PACKET_DLIB_SOURCES) $(CFLAGS)
 

@@ -15,16 +15,19 @@ CLIENT_DLIB_SOURCES = $(CLIENT_OBJECTS) ../FilePacket/lib/*.a ../FileReadWriter/
 
 CLIENT_DEPS = $(patsubst %, %/*, $(IDIR)) 
 
-all: $(CLIENT_OBJECTS) build
+build: $(CLIENT_OBJECTS) build-lib
 
 $(CLIENT_OBJECTS): $(ODIR)/%.o : $(SDIR)/%.cpp $(CLIENT_DEPS)
 	$(CPP) -c $< -o $@ $(CFLAGS)
 
 
-build: $(CLIENT_DLIB_SOURCES) $(CLIENT_DEPS)
+build-lib: $(CLIENT_DLIB_SOURCES) $(CLIENT_DEPS)
 	ar -crs $(LDIR)/$(LIBNAME).a $(CLIENT_OBJECTS)
 	$(CPP) -shared -fPIC -o $(LDIR)/$(LIBNAME).so $(CLIENT_DLIB_SOURCES) $(CFLAGS)
-
+	
+install:
+	sudo rm /usr/local/lib/$(LIBNAME).so 
+	sudo cp $(LDIR)/$(LIBNAME).so /usr/local/lib
 
 clean:
 	rm -r $(ODIR)/*

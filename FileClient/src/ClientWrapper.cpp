@@ -9,7 +9,6 @@ FileClient* AsFileClient(void* fc) {
 }
 
 void* NewFileClient(int mode, char * requestFileName, char * filename = (char*)0) {
-    printf("FASF!\n");
     auto fc = new FileClient(mode, requestFileName, filename);
     return fc;
 }
@@ -23,7 +22,6 @@ void DestroyFileClient(void* fc){
 // Connect connects the client to the specific server specified by the ServerPort 
 // returns false if connect failed and errorMessage is set
 bool Connect(void* fc, char * serverAddress, int port){
-    printf("HEY! %s\n", serverAddress);
     struct ServerPort serverPort;
     serverPort.port = port;
     strcpy(serverPort.serverAddress,serverAddress); //todo: use strlcpy or strncpy

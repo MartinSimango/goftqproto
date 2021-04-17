@@ -1,5 +1,12 @@
 .vscode
 
 *.o
+*.a
+*.so
+
+*.txt
 
 .DS_STORE
+
+Testers
+
