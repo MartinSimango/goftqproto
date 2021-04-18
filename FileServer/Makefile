@@ -14,7 +14,11 @@ SERVER_DEPS = $(patsubst %, %/*, $(IDIR))
 
 SERVER_DLIB_SOURCES= $(SERVER_SOURCES) ../FilePacket/src/*.cpp ../FileReadWriter/src/*.cpp
 
-build: $(SERVER_OBJECTS) build-lib install
+build: build-dir $(SERVER_OBJECTS) build-lib install
+
+build-dir:
+	mkdir -p $(ODIR)
+	mkdir -p $(LDIR)
 
 $(SERVER_OBJECTS): $(ODIR)/%.o : $(SDIR)/%.cpp $(SERVER_DEPS)
 	$(CPP) -c $< -o $@ $(CFLAGS)

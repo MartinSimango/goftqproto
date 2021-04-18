@@ -14,8 +14,11 @@ FRW_DEPS = $(patsubst %, %/*, $(IDIR))
 
 FRW_DLIB_SOURCES= $(FRW_SOURCES)
 
-build: $(FRW_OBJECTS) build-lib
+build: build-dir $(FRW_OBJECTS) build-lib
 
+build-dir:
+	mkdir -p $(ODIR)
+	mkdir -p $(LDIR)
 
 $(FRW_OBJECTS): $(ODIR)/%.o : $(SDIR)/%.cpp $(FRW_DEPS)
 	$(CPP) -c $< -o $@ $(CFLAGS)

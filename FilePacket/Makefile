@@ -14,7 +14,11 @@ PACKET_DEPS=$(patsubst %, %/*, $(IDIR))
 
 PACKET_DLIB_SOURCES=$(PACKET_SOURCES)
 
-build: $(PACKET_OBJECTS) build-lib 
+build: build-dir $(PACKET_OBJECTS) build-lib 
+
+build-dir:
+	mkdir -p $(ODIR)
+	mkdir -p $(LDIR)
 
 $(PACKET_OBJECTS): $(ODIR)/%.o : $(SDIR)/%.cpp $(PACKET_DEPS)
 	$(CPP) -c $< -o $@ $(CFLAGS)

@@ -15,7 +15,11 @@ CLIENT_DLIB_SOURCES = $(CLIENT_SOURCES) ../FilePacket/src/*.cpp ../FileReadWrite
 
 CLIENT_DEPS = $(patsubst %, %/*, $(IDIR)) 
 
-build: $(CLIENT_OBJECTS) build-lib install
+build: build-dir $(CLIENT_OBJECTS) build-lib install
+
+build-dir:
+	mkdir -p $(ODIR)
+	mkdir -p $(LDIR)
 
 $(CLIENT_OBJECTS): $(ODIR)/%.o : $(SDIR)/%.cpp $(CLIENT_DEPS)
 	$(CPP) -c $< -o $@ $(CFLAGS)
