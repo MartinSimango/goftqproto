@@ -24,7 +24,7 @@ void DestroyFileClient(void* fc){
 bool Connect(void* fc, char * serverAddress, int port){
     struct ServerPort serverPort;
     serverPort.port = port;
-    strcpy(serverPort.serverAddress,serverAddress); //todo: use strlcpy or strncpy
+    strncpy(serverPort.serverAddress, serverAddress, sizeof(serverPort.serverAddress)); //todo: use strlcpy or strncpy
     return AsFileClient(fc)->Connect(serverPort);
 }
 // Process either reads or writes to the server depending on what mode the FileClient is in

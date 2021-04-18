@@ -1,5 +1,12 @@
+FROM martinsimango/filecopierbase
+
 FROM scratch 
 
+EXPOSE 3000
+
 WORKDIR /app
-COPY --from=0 /go/bin/email-service email-service
-ENTRYPOINT ["/app/email-service"]
+COPY --from=0 /go/bin/go-server go-server
+COPY --from=0 /go-server-dylibs/* /lib/
+
+
+ENTRYPOINT ["/app/go-server"]

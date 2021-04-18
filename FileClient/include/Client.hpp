@@ -15,7 +15,7 @@ namespace ftc {
 
 
     struct ServerPort {
-        char * serverAddress;
+        char serverAddress[16];
         int port;
     };
 
@@ -160,8 +160,6 @@ namespace ftc {
         // Close closes the connection to the server, returns false upon failure
         bool Close();
     };
-
-
 
 
 };

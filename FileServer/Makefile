@@ -12,9 +12,9 @@ SERVER_OBJECTS=$(patsubst $(SDIR)/%.cpp, $(ODIR)/%.o, $(SERVER_SOURCES))
 
 SERVER_DEPS = $(patsubst %, %/*, $(IDIR)) 
 
-SERVER_DLIB_SOURCES= $(SERVER_OBJECTS) ../FilePacket/lib/*.a ../FileReadWriter/lib/*.a 
+SERVER_DLIB_SOURCES= $(SERVER_SOURCES) ../FilePacket/src/*.cpp ../FileReadWriter/src/*.cpp
 
-build: $(SERVER_OBJECTS) build-lib
+build: $(SERVER_OBJECTS) build-lib install
 
 $(SERVER_OBJECTS): $(ODIR)/%.o : $(SDIR)/%.cpp $(SERVER_DEPS)
 	$(CPP) -c $< -o $@ $(CFLAGS)
@@ -25,9 +25,9 @@ build-lib: $(SERVER_DLIB_SOURCES) $(SERVER_DEPS)
 	$(CPP) -shared -fPIC -o $(LDIR)/$(LIBNAME).so $(SERVER_DLIB_SOURCES) $(CFLAGS)
 
 install:
-	sudo rm /usr/local/lib/$(LIBNAME).so 
-	sudo cp $(LDIR)/$(LIBNAME).so /usr/local/lib
+	rm -f /usr/local/lib/$(LIBNAME).so 
+	cp $(LDIR)/$(LIBNAME).so /usr/local/lib
 
 clean:
-	rm -r $(ODIR)/*
-	rm -r $(LDIR)/*
+	rm -rf $(ODIR)/*
+	rm -rf $(LDIR)/*

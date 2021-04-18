@@ -11,11 +11,11 @@ LIBNAME=libgocpclient
 CLIENT_SOURCES=$(wildcard $(SDIR)/*.cpp)
 CLIENT_OBJECTS=$(patsubst $(SDIR)/%.cpp, $(ODIR)/%.o, $(CLIENT_SOURCES))
 
-CLIENT_DLIB_SOURCES = $(CLIENT_OBJECTS) ../FilePacket/lib/*.a ../FileReadWriter/lib/*.a 
+CLIENT_DLIB_SOURCES = $(CLIENT_SOURCES) ../FilePacket/src/*.cpp ../FileReadWriter/src/*.cpp
 
 CLIENT_DEPS = $(patsubst %, %/*, $(IDIR)) 
 
-build: $(CLIENT_OBJECTS) build-lib
+build: $(CLIENT_OBJECTS) build-lib install
 
 $(CLIENT_OBJECTS): $(ODIR)/%.o : $(SDIR)/%.cpp $(CLIENT_DEPS)
 	$(CPP) -c $< -o $@ $(CFLAGS)
@@ -26,9 +26,9 @@ build-lib: $(CLIENT_DLIB_SOURCES) $(CLIENT_DEPS)
 	$(CPP) -shared -fPIC -o $(LDIR)/$(LIBNAME).so $(CLIENT_DLIB_SOURCES) $(CFLAGS)
 	
 install:
-	sudo rm /usr/local/lib/$(LIBNAME).so 
-	sudo cp $(LDIR)/$(LIBNAME).so /usr/local/lib
+	rm -f /usr/local/lib/$(LIBNAME).so 
+	cp $(LDIR)/$(LIBNAME).so /usr/local/lib
 
 clean:
-	rm -r $(ODIR)/*
-	rm -r $(LDIR)/*
+	rm -rf $(ODIR)/*
+	rm -rf $(LDIR)/*

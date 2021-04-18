@@ -31,18 +31,22 @@ int FileReadWriter::Close(){
     return -2;
 }
 
-char * FileReadWriter::getFileName() const {
+const char * FileReadWriter::getFileName() const {
     return filename;
 }
 
 
 int FileReadWriter::createEmptyFileOfSize(char * filename, int size){
-    FILE *fp= fopen(filename, "w");
+    FILE *fp = fopen(filename, "w");
+    if(!fp) {
+        return -1;
+    }
     ftruncate(fileno(fp), size);
+
     return fclose(fp);
 }
 
-int FileReadWriter::getFileSize(char * filename) {
+int FileReadWriter::getFileSize(const char * filename) {
     struct stat st;
     if(stat(filename, &st) != 0) {
         return 0;

@@ -33,8 +33,8 @@ func NewFileServer(port int) FileServerImpl {
 }
 
 // Free deallocates the memory allocataed to the FileClientImpl instance
-func (fc *FileServerImpl) Free() {
-	C.DestroyFileServer(fc.ptr)
+func (fs *FileServerImpl) Free() {
+	C.DestroyFileServer(fs.ptr)
 }
 
 func (fs *FileServerImpl) StartServer(connections int) bool {

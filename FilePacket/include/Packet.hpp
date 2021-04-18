@@ -26,7 +26,6 @@ namespace packet {
             unsigned char *ptr; 
 
             ptr = serializePacket(buffer);
-
             return write(fd, buffer, ptr - buffer);   
         }
         

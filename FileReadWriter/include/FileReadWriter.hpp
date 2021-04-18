@@ -4,12 +4,15 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <string.h>
+#include <PacketConstants.h>
+#include <stdio.h>
 
 class FileReadWriter
 {
     
 private:
-    char * filename;
+    char filename[MAX_FILEPATH_LENGTH];
     bool mode; // true if reading
     int fd;
     bool opened;
@@ -21,7 +24,7 @@ private:
     }
 
     inline int openFileForWriting() {
-       
+
         int fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY , 0666); //give read write permissions to all users
         if (fileSize > 0) {
             createEmptyFileOfSize(this->filename, this->fileSize);
@@ -31,7 +34,8 @@ private:
 
 
 public:
-    FileReadWriter(char * filename, bool mode, int fileSize = 0): filename(filename), mode(mode){
+    FileReadWriter(char * filename, bool mode, int fileSize = 0): mode(mode){
+         strlcpy(this->filename, filename ,sizeof(this->filename));
          this->fileSize = fileSize;
          opened = false;
     }
@@ -48,12 +52,12 @@ public:
     // Closes closes the file resource
     int Close();
 
-    char * getFileName() const;
+    const char * getFileName() const;
 
     // TPDP change this to a priveate method
     static int createEmptyFileOfSize(char * filename, int size);
     
-    static int getFileSize(char * filename);
+    static int getFileSize(const char * filename);
 
 };
 

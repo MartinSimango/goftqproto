@@ -18,7 +18,7 @@ using namespace packet;
 namespace fts {
 
     struct ServerPort {
-        char * serverAddress;
+        char serverAddress[16];
         int port;
     };
 
@@ -111,7 +111,7 @@ namespace fts {
             if (mode == READ){
                 return 0;
             }
-            
+
             struct stat st;
             char localFile[MAX_FILEPATH_LENGTH];
             strcpy(localFile, filename);
@@ -127,17 +127,19 @@ namespace fts {
                 errorMessage = FAILED_TO_OPEN_FILE;
                 return false;
             }
-            
             return true;
         }
         inline bool handleClientRequest(){
-
+            
             RequestPacket requestPacket(connfd);
             requestPacket.ReadIntoPacket();
 
             this->mode = requestPacket.mode;
-            strcpy(this->filepath, requestPacket.filepath); // TODO rather use strlcpy
 
+           // strlcpy(this->filepath, requestPacket.filepath, sizeof(this->filepath));
+
+              //prepend host to file name TODO check if using docket then only prepend else use above statement
+            sprintf(this->filepath, "/host%s", requestPacket.filepath);
             ResponsePacket responsePacket(connfd);
                   
             if(mode == WRITE) {

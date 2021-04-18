@@ -26,5 +26,5 @@ build-lib: $(FRW_OBJECTS)
 
 
 clean:
-	rm -r $(ODIR)/*
-	rm -r $(LDIR)/*
+	rm -rf $(ODIR)/*
+	rm -rf $(LDIR)/*
