@@ -4,33 +4,36 @@
 using namespace fts;
 
 // Connect connects the client to the specific server
-bool FileServer::StartServer(int connections){
-    return isRunning = createServer() && !listen(sockfd, connections);
+void FileServer::StartServer(int connections){
+    createAndBindServerSocket();
+    if (listen(sockfd, connections) < 0)
+         throw new ServerException(SERVER_FAILED_TO_START_LISTENING);
+    isRunning = true;
 }
 
 bool FileServer::Accept(){
     if(!isRunning){
-        errorMessage = SERVER_NOT_RUNNING;
-        return false;
+        throw new ServerException(SERVER_NOT_RUNNING);
     }
 
     struct sockaddr_in client;
     int len = sizeof(client);
     connfd = accept(sockfd, (struct sockaddr*)&client, (socklen_t *) &len);
     
-    return handleClientRequest() && openFile() && process();
+
+    struct ClientRequest clientRequest = handleClientRequest();
+    if(clientRequest.status != OK) {
+        return false;
+    }
+
+    openFile(clientRequest.create && mode == WRITE); // && mode == WRITE ensures we only create file when writing to a file 
+    process();
+    return true;
 }
 
 bool FileServer::Close(){
-    if (isRunning) {
-        if (close(sockfd) < 0) {
-            errorMessage = FAILED_TO_CLOSE_SOCKET;
-            return false;
-        }
-        isRunning = false;
-        return true;
-    }
-    errorMessage = SERVER_NOT_RUNNING;
-    return false;
-    
+   if(!isRunning || close(sockfd) < 0)
+        throw new ServerException(SERVER_NOT_RUNNING);
+
+   isRunning = false;
 }

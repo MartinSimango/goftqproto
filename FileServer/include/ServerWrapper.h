@@ -6,15 +6,15 @@
 extern "C" {
 #endif
 
-void* NewFileServer(int port);
+void* NewFileServer(int port, char * rootFolder);
 
 void DestroyFileServer(void* fs);
 
-bool StartServer(void* fs, int connections);
+void StartServer(void* fs, int connections);
 
 bool Accept(void* fs);
 
-bool Close(void* fs);
+void CloseFileServer(void* fs);
 
 const char * GetErrorMessage(void* fs);
 

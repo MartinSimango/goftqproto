@@ -7,6 +7,8 @@ SDIR=src
 CFLAGS=$(patsubst %, -I%, $(IDIR)) -std=c++11
 LIBNAME=libgocpserver
 
+# TODO check use of OBJECTS files might not even need them
+
 SERVER_SOURCES=$(wildcard $(SDIR)/*.cpp)
 SERVER_OBJECTS=$(patsubst $(SDIR)/%.cpp, $(ODIR)/%.o, $(SERVER_SOURCES))
 

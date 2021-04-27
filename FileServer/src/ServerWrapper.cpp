@@ -7,8 +7,8 @@ FileServer* AsFileServer(void* fs) {
     return reinterpret_cast<FileServer*>(fs); 
 }
 
-void* NewFileServer(int port){
-    auto fs = new FileServer(port);
+void* NewFileServer(int port, char * rootFoolder){
+    auto fs = new FileServer(port, rootFoolder);
     return fs;
 }
 
@@ -16,16 +16,16 @@ void DestroyFileServer(void* fs){
     AsFileServer(fs)->~FileServer();
 }
 
-bool StartServer(void* fs, int connections){
-    return AsFileServer(fs)->StartServer(connections);
+void StartServer(void* fs, int connections){
+    AsFileServer(fs)->StartServer(connections);
 }
 
 bool Accept(void* fs){
     return AsFileServer(fs)->Accept();
 }
 
-bool Close(void* fs){
-    return AsFileServer(fs)->Close();
+void CloseFileServer(void* fs){
+    AsFileServer(fs)->Close();
 
 }
 

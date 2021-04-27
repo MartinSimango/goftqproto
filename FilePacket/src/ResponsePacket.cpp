@@ -4,6 +4,7 @@ using namespace packet;
 
 ResponsePacket::ResponsePacket(int fd): Packet(fd) {
     packetType = RESPONSE_PACKET;
+    fileSize = -1; //undefined size 
 }
 
 int ResponsePacket::getReadPacketSize() const {

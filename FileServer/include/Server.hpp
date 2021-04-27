@@ -11,6 +11,8 @@
 #include <FileReadWriter.hpp>
 #include <Error.h>
 #include <sys/stat.h>
+#include <string>
+#include <ServerException.hpp>
 
 using namespace packet;
 
@@ -22,149 +24,118 @@ namespace fts {
         int port;
     };
 
+    struct ClientRequest {
+        bool create;
+        unsigned char status;
+
+        ClientRequest(bool create, unsigned char status) {
+            this->create = create;
+            this->status = status;
+        }
+    };
+
     // TODO if error occurs sent request back to client
 
     class FileServer {
         
         private:
-        FileReadWriter *frw;
-        bool isRunning;
-        int sockfd;
-        int connfd;
-        int port;
-        bool mode;
-        char filepath[MAX_FILEPATH_LENGTH];
-        const char * errorMessage;
-        int fileSize;
+
+            FileReadWriter *frw;
+            int sockfd, connfd, port, fileSize;
+            bool mode, isRunning;
+            char filepath[MAX_FILEPATH_LENGTH], rootFolder[20]; // TODO make 20 constant
+            const char * errorMessage;
 
         
+            // TODO be able to have protocol specificied
+            inline void bindServerSocketAddress() {
+                struct sockaddr_in servaddr;
 
-        // TODO be able to have protocol specificied
-        inline bool createAndBindServerAddress(struct sockaddr_in * servaddr) {
+                servaddr.sin_family = AF_INET;
+                servaddr.sin_addr.s_addr = htonl(INADDR_ANY); //allow all address to connect
+                servaddr.sin_port = htons(port);
+                if (bind(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) != 0) 
+                    throw new ServerException(FAILED_TO_BIND_SERVER_SOCKET);
+            }
+
+            // createAndBindServerSocket creates the server socket and binds the socket
+            inline void createAndBindServerSocket() {
+                if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) 
+                    throw new ServerException(FAILED_TO_CREATE_SERVER_SOCKET);
+
+                bindServerSocketAddress();
+            }
+
+            // writeToClient reads from the file request by the client and writes
+            inline void writeToClient() {
+                FileConfigPacket fileConfigPacket(connfd);
+                char buffer[fileConfigPacket.numberOfBytesToRead];
+                int bytesRead = readFromFile(buffer, &fileConfigPacket);
+
+                FilePacket filePacket(connfd, buffer, bytesRead, fileConfigPacket.offset);
+                filePacket.WritePacket();
+            }
             
-            bzero(servaddr, sizeof(*servaddr));
-            servaddr->sin_family = AF_INET;
-            servaddr->sin_addr.s_addr = htonl(INADDR_ANY); //allow address to connect
-            servaddr->sin_port = htons(port);
-
-            // Binding newly created socket to given IP and verification
-            if (bind(sockfd, (struct sockaddr *)servaddr, sizeof(*servaddr)) != 0){
-                return false;
+            inline void readFromClient() {
+                FilePacket packet(connfd);
+                packet.ReadIntoPacket();
+                writeToFile(packet.data, packet.numberOfBytesRead, packet.offset);
             }
-            return true;
 
-        }
+            inline int readFromFile(char * buffer, FileConfigPacket * fileConfigPacket) {
+                return frw->ReadFromFile(buffer, fileConfigPacket->numberOfBytesToRead, fileConfigPacket->offset);
+            }
+            inline int writeToFile(char *buffer, int bytesToWrite, int offset) {
+                return frw->WriteToFile(buffer, bytesToWrite, offset); 
+            }
+        
+            // openFile opens the file for reading or writing
+            inline void openFile(bool create = false) {
+                frw = new FileReadWriter(filepath, mode, fileSize);
+                frw->Open(create);
+            }
 
-        // createServer returns a socket file descripter connect to the socket specifed
-        inline bool createServer(){
+            //handleClientRequest reads the clients request
+            inline ClientRequest handleClientRequest(){
+                
+                RequestPacket requestPacket(connfd);
+                requestPacket.ReadIntoPacket();
+
+                this->mode = requestPacket.mode;
+
+                // TODO convert c type strings to c++
+                sprintf(this->filepath, "%s%s",this->rootFolder, requestPacket.filepath);
+
+                ResponsePacket responsePacket(connfd);
+                    
+
+                responsePacket.status = FileReadWriter::CheckFile(requestPacket.filepath, requestPacket.mode);
+                
+                if (responsePacket.status == OK ) {
+
+                    if (mode == WRITE) {
+                        this->fileSize = requestPacket.fileSize;
+                    }
+                    else if (mode == READ) {
+                        responsePacket.fileSize = FileReadWriter::GetFileSize(requestPacket.filepath);
+                    }
+                }
+                
+                responsePacket.WritePacket();
+                struct ClientRequest clientRequest(requestPacket.createFile, responsePacket.status);
+
+                return clientRequest;
+            }
             
-            struct sockaddr_in servaddr;
-
-            if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
-                errorMessage = FAILED_TO_CREATE_SOCKET;
-                return false;
+            inline void process(){
+                mode == WRITE ? readFromClient(): writeToClient();
             }
-
-            return createAndBindServerAddress(&servaddr);
-        }
-
-        //read from server, then write to client
-        inline int writeToClient(){
-            FileConfigPacket fileConfigPacket(connfd);
-            char buffer[fileConfigPacket.numberOfBytesToRead];
-            int bytesRead = readFromFile(buffer, &fileConfigPacket);
-
-            FilePacket filePacket(connfd, buffer, bytesRead, fileConfigPacket.offset);
-            return filePacket.WritePacket();
-        }
-        
-        inline int readFromClient(){
-            FilePacket packet(connfd);
-            packet.ReadIntoPacket();
-            return writeToFile(packet.data, packet.numberOfBytesRead, packet.offset);
-        }
-
-        inline int readFromFile(char * buffer, FileConfigPacket * fileConfigPacket) {
-            return frw->ReadFromFile(buffer, fileConfigPacket->numberOfBytesToRead, fileConfigPacket->offset);
-        }
-        inline int writeToFile(char *buffer, int bytesToWrite, int offset) {
-            return frw->WriteToFile(buffer, bytesToWrite, offset); 
-        }
-    
-        inline unsigned char checkFileForRead(char * filename){
-            if (access(filename, F_OK) == 0) {
-                return access(filename, R_OK) == 0 ? OK : NO_READ_PERMISSIONS;
-            }
-            else {
-                return FILE_NOT_FOUND;
-            }
-        }    
-
-        inline unsigned char checkFileForWrite(char * filename){
-            if (access(filename, F_OK) == 0) {
-                return access(filename, W_OK) == 0 ? OK : NO_WRITE_PERMISIONS;
-            }
-            return OK;
-        }
-        
-        inline int getFileSize(char *filename){
-            if (mode == READ){
-                return 0;
-            }
-
-            struct stat st;
-            char localFile[MAX_FILEPATH_LENGTH];
-            strcpy(localFile, filename);
-            if(stat(localFile, &st) != 0) {
-                return 0;
-            }
-            return st.st_size;
-        }
-        // openFile opens the file for reading or writing
-        inline bool openFile(){
-            frw = new FileReadWriter(filepath, mode, fileSize);
-            if (!frw->Open()) {
-                errorMessage = FAILED_TO_OPEN_FILE;
-                return false;
-            }
-            return true;
-        }
-        inline bool handleClientRequest(){
-            
-            RequestPacket requestPacket(connfd);
-            requestPacket.ReadIntoPacket();
-
-            this->mode = requestPacket.mode;
-
-           // strlcpy(this->filepath, requestPacket.filepath, sizeof(this->filepath));
-
-              //prepend host to file name TODO check if using docket then only prepend else use above statement
-            sprintf(this->filepath, "/host%s", requestPacket.filepath);
-            ResponsePacket responsePacket(connfd);
-                  
-            if(mode == WRITE) {
-                this->fileSize = requestPacket.fileSize;
-            }
-            else if(mode == READ){
-                responsePacket.fileSize = getFileSize(this->filepath);
-            }
-
-
-            responsePacket.status = (requestPacket.mode == READ) ? checkFileForRead(requestPacket.filepath)
-                                                                : checkFileForWrite(requestPacket.filepath);
-
-            return responsePacket.WritePacket() >= 0 && responsePacket.status == OK;
-        }
-        
-        inline bool process(){
-            return mode == WRITE ? readFromClient() >= 0: writeToClient() >= 0;
-        }
 
         public:
 
         // ServerPort represent the server the 
-        FileServer(int port): port(port){ 
-            fileSize = 0;
+        FileServer(int port, char * rootFolder = ""): port(port), fileSize(-1){ 
+            strncpy(this->rootFolder, rootFolder, sizeof(this->rootFolder));
         }
 
         ~FileServer() {
@@ -173,8 +144,8 @@ namespace fts {
             }
         }
 
-        // Connect connects the client to the specific server
-        bool StartServer(int connections);
+        // StartServer
+        void StartServer(int connections);
 
         bool Accept();
         // writeToServer writes to the server

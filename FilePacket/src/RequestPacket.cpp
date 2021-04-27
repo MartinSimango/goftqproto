@@ -28,15 +28,15 @@ int RequestPacket::getWritePacketSize() const {
 
 void RequestPacket::deserializePacket(unsigned char *buffer) {
     buffer = deserialize_char(buffer, (char *) &mode);
-        buffer = deserialize_int_big_endian(buffer, &fileSize);   
-
+    buffer = deserialize_char(buffer, (char *) &createFile);
+    buffer = deserialize_int_big_endian(buffer, &fileSize);   
     buffer = deserialize_char_array(buffer, filepath); 
 }
 
 unsigned char * RequestPacket::serializePacket(unsigned char *buffer) {
     buffer = serialize_char(buffer, mode);
-        buffer = serialize_int_big_endian(buffer, fileSize);
-
+    buffer = serialize_char(buffer, createFile);
+    buffer = serialize_int_big_endian(buffer, fileSize);
     buffer = serialize_char_array(buffer, filepath);
 
     return buffer; 

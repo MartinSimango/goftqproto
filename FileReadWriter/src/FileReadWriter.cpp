@@ -2,54 +2,57 @@
 #include <FileReadWriter.hpp>
 #include <stdio.h>
 
-bool FileReadWriter::Open(){
-    fd = (mode == READ) ? openFileForReading() : openFileForWriting();
-    opened = (fd >= 0);
-    return opened;
+void FileReadWriter::Open(bool create = false){
+    (mode == READ) ? openFileForReading() : openFileForWriting(create);
 }
 
-int FileReadWriter::WriteToFile(char * data,size_t number_of_bytes, int offset){
-        if(!opened){
-        return -2;
-    }
-    lseek (fd, offset, SEEK_CUR);      
-    return write (fd, data, number_of_bytes);
-}
-int FileReadWriter::ReadFromFile(char * data,size_t number_of_bytes, int offset) {
-    if(!opened){
-        return -2;
-    }
-    lseek (fd, offset, SEEK_CUR);   
-    return read(fd, data, number_of_bytes);
+int FileReadWriter::WriteToFile(char * data, size_t number_of_bytes, int offset){
+    if (!opened) 
+        throw new FRWException(FAILED_TO_WRITE_FILE_NOT_OPEN, filename);
+    
+    int bytes_read;
+    if (lseek (fd, offset, SEEK_CUR) < 0 || (bytes_read = write(fd, data, number_of_bytes) ) < 0) 
+        throw new FRWException(FAILED_TO_WRITE_TO_FILE, filename);
+
+    return bytes_read;
 }
 
-int FileReadWriter::Close(){
-    if(opened) {
-        opened = false;
-        return close(fd);
+int FileReadWriter::ReadFromFile(char * data, size_t number_of_bytes, int offset) {
+    if (!opened)
+        throw new FRWException(FAILED_TO_READ_FILE_NOT_OPEN, filename);
+    
+    int bytes_read;
+
+    if (lseek (fd, offset, SEEK_CUR) < 0 || ( bytes_read = read(fd, data, number_of_bytes) ) < 0)  {
+        throw new FRWException(FAILED_TO_READ_FROM_FILE, filename);
     }
-    return -2;
+    return bytes_read;
 }
 
-const char * FileReadWriter::getFileName() const {
+void FileReadWriter::Close(){
+    if (!opened)
+        throw new FRWException(FAILED_TO_CLOSE_FILE_NOT_OPEN, filename);
+    if (close(fd) < 0)
+        throw new FRWException(FAILED_TO_CLOSE_FILE, filename);
+}
+
+const char * FileReadWriter::GetFileName() const {
     return filename;
 }
 
-
-int FileReadWriter::createEmptyFileOfSize(char * filename, int size){
-    FILE *fp = fopen(filename, "w");
-    if(!fp) {
-        return -1;
-    }
-    ftruncate(fileno(fp), size);
-
-    return fclose(fp);
+int FileReadWriter::GetFileSize() const {
+    return fileSize;
 }
 
-int FileReadWriter::getFileSize(const char * filename) {
+unsigned char FileReadWriter::CheckFile(const char * filename, bool mode) {
+      return (mode == READ) ? checkFileForRead(filename)
+                            : checkFileForWrite(filename);
+}
+
+int FileReadWriter::GetFileSize(const char * filename) {
     struct stat st;
-    if(stat(filename, &st) != 0) {
-        return 0;
-    }
+    if(stat(filename, &st) != 0) 
+        throw new FRWException(FAILED_TO_GET_FILE_SIZE, filename);
+    
     return st.st_size;
 }

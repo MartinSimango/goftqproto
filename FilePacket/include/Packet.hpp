@@ -3,7 +3,9 @@
 #include <unistd.h>
 #include <PacketConstants.h>
 #include <Serializer.h>
+#include <PacketException.hpp>
 
+// TODO make all virtual functions protected methods and then make them private derived packet classes 
 namespace packet {
 
     class Packet {
@@ -15,9 +17,12 @@ namespace packet {
         int packetType;    
 
         public:
+
         Packet(int fd): fd(fd) { packetType = PACKET; } 
         virtual ~Packet() {}
-        int getPacketType() const { return packetType; }
+        
+        int GetPacketType() const { return packetType; }
+
         int WritePacket() {
             
             int packetByteSize = getWritePacketSize();
@@ -26,20 +31,28 @@ namespace packet {
             unsigned char *ptr; 
 
             ptr = serializePacket(buffer);
-            return write(fd, buffer, ptr - buffer);   
+
+            int bytes_written = write(fd, buffer, ptr - buffer);   
+
+            if (bytes_written < 0) 
+                throw new PacketException(FAILED_TO_WRITE_PACKET, packetType);
+
+            return bytes_written;
         }
         
         int ReadIntoPacket(){
             int packetByteSize = getReadPacketSize();
             unsigned char buffer[packetByteSize]; 
             int bytesRead = read(fd, buffer, packetByteSize);
-            if (bytesRead >= 0) {
-                deserializePacket(buffer);
-            }
-                    //TODO handle errors
-            return bytesRead;
             
+            if (bytesRead < 0) 
+                throw new PacketException(FAILED_TO_READ_FROM_PACKET, packetType);
+
+            deserializePacket(buffer);
+
+            return bytesRead;
         }
+
         virtual int getReadPacketSize() const = 0;
         virtual int getWritePacketSize() const { return getReadPacketSize(); }
         virtual void deserializePacket(unsigned char *buffer) = 0;

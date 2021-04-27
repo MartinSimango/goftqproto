@@ -8,7 +8,7 @@ namespace packet {
 
         // TODO make instance variablles private and make getters and setters
         public:
-        bool mode;
+        bool mode, createFile;
         char filepath[MAX_FILEPATH_LENGTH];
         int fileSize;
 
