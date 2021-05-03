@@ -3,37 +3,34 @@
 using namespace ftc;
 
 
-bool FileClient::Connect(struct ServerPort serverPort){
-    if (isConnected){
-        errorMessage = CLIENT_ALREADY_CONNECTED;
-        return false;
-    }
-    isConnected = connectToServer(serverPort) && requestToServer() && openFile();
-    return isConnected;
+void FileClient::Connect(struct ServerPort serverPort, bool create){
+    if (isConnected)
+        throw new ClientException(CLIENT_ALREADY_CONNECTED);
+    
+    connectToServer(serverPort);
+    requestToServer(create && mode == WRITE);
+    openFile(create && mode == READ);
+    isConnected = true;
 }
 
 int FileClient::Process(int offset, int numberOfBytesRead){
     if (!isConnected)
-        return false;
+        throw new ClientException(CLIENT_NOT_CONNECTED);
         
     FileConfigPacket packet(sockfd, offset, numberOfBytesRead);
 
-    return mode == READ ? readFromServer(&packet): writeToServer(&packet);
+    return (mode == READ) ? readFromServer(&packet): writeToServer(&packet);
 }
 
 const char * FileClient::GetErrorMessage() const {
     return errorMessage;
 }
 
-bool FileClient::Close() {
-    if (isConnected) {
-        if (close(sockfd) < 0) {
-            errorMessage = FAILED_TO_CLOSE_SOCKET;
-            return false;
-        }
-        isConnected = false;
-        return true;
-    }
-    errorMessage = CLIENT_NOT_CONNECTED;
-    return false;
+void FileClient::Close() {
+    if (!isConnected)
+        throw new ClientException(CLIENT_NOT_CONNECTED);
+    if (close(sockfd) < 0) 
+        throw new ClientException(FAILED_TO_CLOSE_CLIENT_SOCKET);
+
+    isConnected = false;
 }

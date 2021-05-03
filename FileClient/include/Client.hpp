@@ -6,9 +6,9 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include <Error.h>
 #include <FileReadWriter.hpp>
 #include <Packets.hpp>
+#include <ClientException.hpp>
 
 using namespace packet;
 namespace ftc {
@@ -23,25 +23,22 @@ namespace ftc {
     class FileClient {
         
         private:
-        bool isConnected;
-        bool mode;
+        bool isConnected, mode;
         int sockfd;
         const char * errorMessage;
         char requestFileName[MAX_FILEPATH_LENGTH];
         FileReadWriter *frw;
-
-        
+    
 
         // TODO be able to have protocol specificied
 
         // connectToServer to the connects to the server specified by serverPort
-        inline bool connectToServer(struct ServerPort serverPort){
+        inline void connectToServer(struct ServerPort serverPort){
             
             struct sockaddr_in servaddr;
 
             if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
-                errorMessage = FAILED_TO_CREATE_SOCKET;
-                return false;
+                throw new ClientException(FAILED_TO_CREATE_CLIENT_SOCKET);
             }
 
             bzero(&servaddr, sizeof(servaddr));
@@ -50,31 +47,23 @@ namespace ftc {
             servaddr.sin_port = htons(serverPort.port);
             
             if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) != 0) {
-                errorMessage = FAILED_TO_CONNECT_TO_SERVER;
-                return false;
+                throw new ClientException(FAILED_TO_CONNECT_TO_SERVER);
             }
         
-            return true;
             
         }
 
-        // getWroteFileSize gets the size of the file when writing to th server
         // requestToServer makes a request to the server to see if it can read or write to the server
-        inline bool requestToServer(){
+        inline bool requestToServer(bool create = false){
             
-            int fileSize = (mode == WRITE) ? FileReadWriter::getFileSize(frw->getFileName()): 0;
+            int fileSize = (mode == WRITE) ? FileReadWriter::GetFileSize(this->requestFileName): -1;
 
-            RequestPacket requestPacket(sockfd, mode, requestFileName, fileSize);
-
-            if (requestPacket.WritePacket() < 0){
-                return false;
-            }
+            RequestPacket requestPacket(sockfd, mode, requestFileName, fileSize, create);
+            requestPacket.WritePacket();
+    
 
             ResponsePacket responsePacket(sockfd);
-            if (responsePacket.ReadIntoPacket() < 0){
-
-                return false;
-            }
+            responsePacket.ReadIntoPacket();
 
             //read back what server says
             if (responsePacket.status == OK){
@@ -86,12 +75,8 @@ namespace ftc {
         }
 
         // opens the requestPacket file that you are reading from or writing to
-        inline bool openFile(){
-            if (!frw->Open()) {
-                errorMessage = FAILED_TO_OPEN_FILE;
-                return false;
-            }
-            return true;
+        inline void openFile(bool create = false){
+            frw->Open(create);
         }
 
         inline int readFromFile(char * buffer, FileConfigPacket * fileConfigPacket) {
@@ -106,13 +91,14 @@ namespace ftc {
             char dataRead[fileConfigPacket->numberOfBytesToRead];
             int numberOfBytesRead;
 
-            if ( (numberOfBytesRead = readFromFile(dataRead, fileConfigPacket) ) < 0) {
-                return false;
-            }
+            numberOfBytesRead = readFromFile(dataRead, fileConfigPacket);
+            
             //TODO accomdate for when data is finished being raed
             //write file packet to server
             FilePacket packet(sockfd, dataRead, numberOfBytesRead, fileConfigPacket->offset);    
-            return packet.WritePacket();       
+            packet.WritePacket(); 
+            
+            return numberOfBytesRead;      
         }
         
         // ReadFromServer reads from the server and writes to the client, returns false upon failure
@@ -120,13 +106,10 @@ namespace ftc {
         inline int readFromServer(FileConfigPacket * fileConfigPacket){
 
             //write to server to tell where to start getting data from
-            if (fileConfigPacket->WritePacket() < 0){
-                return false;
-            }           
+            fileConfigPacket->WritePacket();          
 
             FilePacket packet(sockfd);            
             packet.ReadIntoPacket();
-            //TODO accomodate for error
 
             return writeToFile(packet.data, packet.numberOfBytesRead, packet.offset);        
         }
@@ -135,20 +118,19 @@ namespace ftc {
 
         // if writing to server filename will be file we want to read from
         // if reading from server filename will be file we want to write to
-        FileClient(bool mode, char * requestFileName, char * filename = nullptr): errorMessage(nullptr), mode(mode) {
+        FileClient(bool mode, char * requestFileName, char * filename = NULL): errorMessage(NULL), mode(mode) {
             frw = new FileReadWriter( (!filename) ? requestFileName : filename, !mode); // ! request.mode because if you are writing to server you are reading from client
-            strcpy(this->requestFileName, requestFileName);
+            strncpy(this->requestFileName, requestFileName, sizeof(this->requestFileName));
         }
 
         ~FileClient() {
-            if (frw) {
-                delete frw;
-            }
+            delete frw;
+            frw = NULL;
         }
 
         // Connect connects the client to the specific server specified by the ServerPort 
         // returns false if connect failed and errorMessage is set
-        bool Connect(struct ServerPort serverPort);
+        void Connect(struct ServerPort serverPort, bool create = false);
         
         // Process either reads or writes to the server depending on what mode the FileClient is in
         // returns the number of bits written or read to the server depending on the mode
@@ -158,7 +140,7 @@ namespace ftc {
         const char * GetErrorMessage() const;
         
         // Close closes the connection to the server, returns false upon failure
-        bool Close();
+        void Close();
     };
 
 

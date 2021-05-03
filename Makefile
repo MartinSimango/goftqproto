@@ -8,12 +8,19 @@ build-c:
 	$(MAKE) -C FilePacket
 	$(MAKE) -C FileClient
 	$(MAKE) -C FileServer
+	$(MAKE) -C Error
 
 build-go:
 	go build ./...
 
 install: build 
 	go install ./...
+
+install-go: 
+	go build ./...
+	go install ./...
+
+
 
 # $(SUBDIRS):
 # 	$(MAKE) -C $@
@@ -40,3 +47,4 @@ clean:
 	$(MAKE) clean -C FilePacket
 	$(MAKE) clean -C FileClient
 	$(MAKE) clean -C FileServer
+	$(MAKE) clean -C Error

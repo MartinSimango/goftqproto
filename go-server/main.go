@@ -9,11 +9,9 @@ import (
 
 func main() {
 
-	fs := fileServer.NewFileServer(3000)
-	if !fs.StartServer(5) {
-		fmt.Println("[Server...] " + fs.GetErrorMessage())
-		os.Exit(-1)
-	}
+	fs := fileServer.NewFileServer(3000, "")
+
+	fs.StartServer(5)
 
 	fmt.Println("[Server...] " + "Server started...")
 
@@ -23,10 +21,7 @@ func main() {
 	}
 	fmt.Println("[Server...] " + "Closing server")
 
-	if !fs.Close() {
-		fmt.Println(fs.GetErrorMessage())
-		os.Exit(-1)
-	}
+	fs.Close()
 
 	fmt.Println("[Server...] " + "Program succeeded")
 }

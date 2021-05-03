@@ -14,7 +14,7 @@ namespace packet {
 
         RequestPacket(int fd);
 
-        RequestPacket(int fd, bool mode, char * filepath, int fileSize);
+        RequestPacket(int fd, bool mode, char * filepath, int fileSize, bool createFile);
 
         int getReadPacketSize() const override;
 

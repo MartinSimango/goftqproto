@@ -1,36 +1,27 @@
 #pragma once
-#include <iostream>
-#include <exception>
-
-// SOCKET ERRORS
-// static const char * FAILED_TO_CREATE_SOCKET = "Failed to create the socket!";
-// static const char * FAILED_TO_CONNECT_TO_SERVER = "Failed to connect to the server!";
-// static const char * FAILED_TO_ACCECT_CLIENT = "Failed to accept client connecion!";
-// static const char * FAILED_TO_CLOSE_SOCKET = "Failed to close the socket!";
-// static const char * CLIENT_ALREADY_CONNECTED = "The client is already connected to a server";
-// static const char * CLIENT_NOT_CONNECTED = "The client is not connted to the server";
-// static const char * FAILED_TO_READ_FROM_SERVER_SOCKET = "Failed to read from server socket!";
-// static const char * FAILED_TO_WRITE_TO_SERVER_SOCKET = "Failed to write to server socket!";
-// static const char * FAILED_TO_READ_FROM_CLIENT_SOCKET = "Failed to read from client socket!";
-// static const char * FAILED_TO_WRITE_TO_CLIENT_SOCKET = "Failed to write to client socket!";
+#include <FileCopierException.hpp>
 
 static const char * FAILED_TO_BIND_SERVER_SOCKET = "Failed to bind the server socket.";
 static const char * FAILED_TO_CREATE_SERVER_SOCKET = "Failed to create the server socket!";
 static const char * SERVER_FAILED_TO_START_LISTENING = "Server failed to start listening!";
 static const char * SERVER_NOT_RUNNING = "The server is not running!";
+static const char * FAILED_TO_CLOSE_SERVER_SOCKET = "Failed to close the server socket.";
 
 
-
-class ServerException : public std::exception {
+class ServerException : public fce::FileCopierException {
     
     private:
 	    const char* error;
     
     public:
-        ServerException(const char *error) : std::exception(), error(error){}
+        ServerException(const char *error) : fce::FileCopierException(), error(error){}
     	
-        const char * what() const override {
+        const char * what() const throw() override {
             return error;   
         }
-       
+
+        char * getErrorMessage(char * error) override {
+            sprintf(error, "[ServerException] Error: %s\n", this->error);
+            return error;
+        }
 };

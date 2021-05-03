@@ -1,6 +1,5 @@
 #pragma once
-#include <iostream>
-#include <exception>
+#include <FileCopierException.hpp>
 
 
 static const char * FAILED_TO_RESIZE_FILE = "Failed to resize file.";
@@ -19,21 +18,26 @@ static const char * FAILED_TO_READ_FILE_NOT_OPEN = "Cannot read to unopened file
 static const char * FAILED_TO_CLOSE_FILE_NOT_OPEN = "Cannot close unopened file.";
 
 
-class FRWException : public std::exception {
+class FRWException : public fce::FileCopierException {
     
     private:
 	    const char* error;
         const char* filename;
     
     public:
-        FRWException(const char *error, const char * filename) : std::exception(), error(error), filename(filename){}
+        FRWException(const char *error, const char * filename) : fce::FileCopierException(), error(error), filename(filename){}
     	
-        const char * what() const override {
+        const char * what() const throw() override {
             return error;   
         }
 
-        const char * filename() const {
+        const char * getFilename() const {
             return filename;   
+        }
+        
+        char * getErrorMessage(char * error) override {
+            sprintf(error, "[FRWException] Error: %s\n[FRWException] File: %s\n", this->error, this->filename);
+            return error;
         }
        
 };

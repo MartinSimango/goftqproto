@@ -36,7 +36,7 @@ namespace packet {
 
             if (bytes_written < 0) 
                 throw new PacketException(FAILED_TO_WRITE_PACKET, packetType);
-
+            
             return bytes_written;
         }
         

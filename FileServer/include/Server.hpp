@@ -9,7 +9,6 @@
 #include <unistd.h>
 #include <Packets.hpp>
 #include <FileReadWriter.hpp>
-#include <Error.h>
 #include <sys/stat.h>
 #include <string>
 #include <ServerException.hpp>
@@ -44,8 +43,6 @@ namespace fts {
             int sockfd, connfd, port, fileSize;
             bool mode, isRunning;
             char filepath[MAX_FILEPATH_LENGTH], rootFolder[20]; // TODO make 20 constant
-            const char * errorMessage;
-
         
             // TODO be able to have protocol specificied
             inline void bindServerSocketAddress() {
@@ -134,14 +131,13 @@ namespace fts {
         public:
 
         // ServerPort represent the server the 
-        FileServer(int port, char * rootFolder = ""): port(port), fileSize(-1){ 
+        FileServer(int port, const char * rootFolder = ""): port(port), fileSize(-1){ 
             strncpy(this->rootFolder, rootFolder, sizeof(this->rootFolder));
         }
 
         ~FileServer() {
-            if (frw) {
-                delete frw;
-            }
+            delete frw;
+            frw = NULL;
         }
 
         // StartServer
@@ -150,9 +146,8 @@ namespace fts {
         bool Accept();
         // writeToServer writes to the server
 
-        bool Close();
+        void Close();
 
-        const char * getErrorMessage() { return errorMessage; }
     };
 
 };

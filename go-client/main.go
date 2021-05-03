@@ -12,15 +12,25 @@ func main() {
 	fmt.Println("[Client...] " + "Starting client...")
 
 	fc := client.NewFileClient(client.WRITE, "/Users/martinsimango/tlpl.txt", "../Testers/File.txt")
-	if !fc.Connect("127.0.0.1", 3000) {
-		fmt.Println("[Client...] " + fc.GetErrorMessage())
+	cerr := fc.Connect("127.0.0.1", 3000)
+
+	if cerr != nil {
+		fmt.Println(cerr.Error())
+		cerr.Free()
 		os.Exit(1)
 	}
+
 	fmt.Println("[Client...] " + "Processing...")
-	if fc.Process(0, 10) < 0 {
-		fmt.Println("[Client...] " + fc.GetErrorMessage())
+	r, cerr := fc.Process(0, 10)
+
+	if cerr != nil {
+		fmt.Println(cerr.Error())
 		os.Exit(1)
 	}
+	fmt.Println(r)
+
 	fmt.Println("[Client...] " + "Program Done!!!")
+
+	fc.Free()
 
 }

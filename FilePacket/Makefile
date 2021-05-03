@@ -1,10 +1,10 @@
 CC=gcc
 CPP=g++
-IDIR=include
+IDIR=include ../Error/include
 ODIR=obj
 LDIR=lib
 SDIR=src
-CFLAGS=$(patsubst %, -I%, $(IDIR)) -std=c++11
+CFLAGS=$(patsubst %, -I%, $(IDIR)) -std=c++17
 LIBNAME=libpacket
 
 PACKET_SOURCES=$(wildcard $(SDIR)/*.cpp)

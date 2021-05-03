@@ -8,13 +8,14 @@ RequestPacket::RequestPacket(int fd): Packet(fd){
     this->fileSize = 0;
 }
 
-RequestPacket::RequestPacket(int fd, bool mode, char * filepath,int fileSize): Packet(fd) {
+RequestPacket::RequestPacket(int fd, bool mode, char * filepath,int fileSize, bool createFile): Packet(fd) {
     packetType = REQUEST_PACKET;
     this->mode = mode;
     if (filepath) {
         strlcpy(this->filepath, filepath, sizeof(this->filepath));
     }
     this->fileSize = fileSize;
+    this->createFile = createFile;
 }
 
 int RequestPacket::getReadPacketSize() const {

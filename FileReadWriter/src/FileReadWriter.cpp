@@ -2,8 +2,9 @@
 #include <FileReadWriter.hpp>
 #include <stdio.h>
 
-void FileReadWriter::Open(bool create = false){
+void FileReadWriter::Open(bool create){
     (mode == READ) ? openFileForReading() : openFileForWriting(create);
+    opened = true;
 }
 
 int FileReadWriter::WriteToFile(char * data, size_t number_of_bytes, int offset){

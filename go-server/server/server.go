@@ -11,9 +11,9 @@ const READ = int(C.READ)
 const WRITE = int(C.WRITE)
 
 type FileServer interface {
-	StartServer(connections int) bool
+	StartServer(connections int)
 	Accept() bool
-	Close() bool
+	Close()
 	GetErrorMessage() string
 	Free()
 }
@@ -26,9 +26,9 @@ type FileServerImpl struct {
 var _ FileServer = &FileServerImpl{}
 
 // NewFileServer creates a new instance of FileServer
-func NewFileServer(port int) FileServerImpl {
+func NewFileServer(port int, rootFolder string) FileServerImpl {
 	var fs = FileServerImpl{}
-	fs.ptr = C.NewFileServer(C.int(port))
+	fs.ptr = C.NewFileServer(C.int(port), C.CString(rootFolder))
 	return fs
 }
 
@@ -37,8 +37,8 @@ func (fs *FileServerImpl) Free() {
 	C.DestroyFileServer(fs.ptr)
 }
 
-func (fs *FileServerImpl) StartServer(connections int) bool {
-	return bool(C.StartServer(fs.ptr, C.int(connections)))
+func (fs *FileServerImpl) StartServer(connections int) {
+	C.StartServer(fs.ptr, C.int(connections))
 }
 
 // Accepts waits and accepts a client connection
@@ -47,11 +47,11 @@ func (fs *FileServerImpl) Accept() bool {
 }
 
 // Close closes the connection to the server, returns false upon failure
-func (fs *FileServerImpl) Close() bool {
-	return bool(C.Close(fs.ptr))
+func (fs *FileServerImpl) Close() {
+	C.CloseFileServer(fs.ptr)
 }
 
 // GetErrorMessge returns the errorMessage
 func (fs *FileServerImpl) GetErrorMessage() string {
-	return C.GoString(C.GetErrorMessage(fs.ptr))
+	return C.GoString(C.GetServerErrorMessage(fs.ptr))
 }

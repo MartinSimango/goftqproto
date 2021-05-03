@@ -2,23 +2,26 @@ package client
 
 import (
 	"unsafe"
+
+	"github.com/MartinSimango/FileCopier/go-error/cerror"
 )
 
-// #cgo CFLAGS:  -I${SRCDIR}/../../FileClient/include -I../../FilePacket/include -I../../include
+// #cgo CFLAGS:  -I${SRCDIR}/../../FileClient/include -I../../FilePacket/include -I../../Error/include
 // #cgo LDFLAGS: -L${SRCDIR}/../../FileClient/lib -lgocpclient
 // #include "ClientWrapper.h"
+// #include "ErrorWrapper.h"
 import "C"
 
 const READ = int(C.READ)
 const WRITE = int(C.WRITE)
 
 type FileClient interface {
-	Connect(address string, port int) bool
-	Process(offset, numberOfBytesRead int) int
-	GetErrorMessage() string
-	Close() bool
+	Connect(address string, port int) cerror.CError
+	Process(offset, numberOfBytesRead int) (int, cerror.CError)
+	Close() cerror.CError
 	Free()
 }
+
 type FileClientImpl struct {
 	ptr unsafe.Pointer
 }
@@ -39,21 +42,42 @@ func (fc FileClientImpl) Free() {
 }
 
 // Close closes the connection to the server, returns false upon failure
-func (fc FileClientImpl) Connect(address string, port int) bool {
-	return bool(C.Connect(fc.ptr, C.CString(address), C.int(port)))
+func (fc FileClientImpl) Connect(address string, port int) cerror.CError {
+	cerr := cerror.CErrorImpl{} // TODO need to free this
+
+	cerr.Ptr = C.Connect(fc.ptr, C.CString(address), C.int(port), C.bool(false))
+
+	errorMessage := cerr.GetErrorMessage()
+
+	if errorMessage != nil {
+		return cerr
+	}
+	cerr.Free()
+	return nil
 }
 
 // Process either reads or writes to the server depending on what mode the FileClient is in
-func (fc FileClientImpl) Process(offset, numberOfBytesRead int) int {
-	return int(C.Process(fc.ptr, C.int(offset), C.int(numberOfBytesRead)))
+func (fc FileClientImpl) Process(offset, numberOfBytesRead int) (int, cerror.CError) {
+	cerr := cerror.CErrorImpl{}
+	cerr.Ptr = C.Process(fc.ptr, C.int(offset), C.int(numberOfBytesRead))
+	errorMessage := cerr.GetErrorMessage()
+	if errorMessage != nil {
+		return -1, cerr
+	}
+
+	retVal := cerr.GetFuncReturnValue().(int)
+	cerr.Free()
+	return retVal, nil
 }
 
 // Close closes the connection to the server, returns false upon failure
-func (fc FileClientImpl) Close() bool {
-	return bool(C.Close(fc.ptr))
-}
-
-// GetErrorMessge returns the errorMessage
-func (fc FileClientImpl) GetErrorMessage() string {
-	return C.GoString(C.GetErrorMessage(fc.ptr))
+func (fc FileClientImpl) Close() cerror.CError {
+	cerr := cerror.CErrorImpl{} // TODO need to free this
+	cerr.Ptr = C.CloseFileClient(fc.ptr)
+	errorMessage := cerr.GetErrorMessage()
+	if errorMessage != nil {
+		return cerr
+	}
+	cerr.Free()
+	return nil
 }

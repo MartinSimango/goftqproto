@@ -1,5 +1,6 @@
 #include <Server.hpp>
 #include <ServerWrapper.h>
+#include <ErrorVoid.hpp>
 
 using namespace fts;
 
@@ -8,7 +9,7 @@ FileServer* AsFileServer(void* fs) {
 }
 
 void* NewFileServer(int port, char * rootFoolder){
-    auto fs = new FileServer(port, rootFoolder);
+    FileServer * fs = new FileServer(port, rootFoolder);
     return fs;
 }
 
@@ -16,19 +17,41 @@ void DestroyFileServer(void* fs){
     AsFileServer(fs)->~FileServer();
 }
 
-void StartServer(void* fs, int connections){
-    AsFileServer(fs)->StartServer(connections);
+void* StartServer(void* fs, int connections){
+    Error<void, FileServer, int> * error = new Error<void, FileServer,int>(&FileServer::StartServer, AsFileServer(fs));
+    
+    try {
+         error->Execute(connections);
+    }
+    catch(fce::FileCopierException* e) {
+        error->SetErrorMessage(&fce::FileCopierException::getErrorMessage, e);
+        delete e;
+    }
+    return dynamic_cast<ErrorBase*>(error);
 }
 
 bool Accept(void* fs){
-    return AsFileServer(fs)->Accept();
+    Error<bool, FileServer> * error = new Error<bool, FileServer>(&FileServer::Accept, AsFileServer(fs));
+    
+    try {
+         error->Execute();
+    }
+    catch(fce::FileCopierException* e) {
+        error->SetErrorMessage(&fce::FileCopierException::getErrorMessage, e);
+        delete e;
+    }
+    return dynamic_cast<ErrorBase*>(error);
 }
 
-void CloseFileServer(void* fs){
-    AsFileServer(fs)->Close();
-
-}
-
-const char * GetErrorMessage(void* fs){
-    return AsFileServer(fs)->getErrorMessage();
+void* CloseFileServer(void* fs){
+    Error<void, FileServer> * error = new Error<void, FileServer>(&FileServer::Close, AsFileServer(fs));
+    
+    try {
+         error->Execute();
+    }
+    catch(fce::FileCopierException* e) {
+        error->SetErrorMessage(&fce::FileCopierException::getErrorMessage, e);
+        delete e;
+    }
+    return dynamic_cast<ErrorBase*>(error);
 }

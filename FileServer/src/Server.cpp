@@ -22,7 +22,7 @@ bool FileServer::Accept(){
     
 
     struct ClientRequest clientRequest = handleClientRequest();
-    if(clientRequest.status != OK) {
+    if (clientRequest.status != OK) {
         return false;
     }
 
@@ -31,9 +31,12 @@ bool FileServer::Accept(){
     return true;
 }
 
-bool FileServer::Close(){
-   if(!isRunning || close(sockfd) < 0)
+void FileServer::Close(){
+    if (!isRunning)
         throw new ServerException(SERVER_NOT_RUNNING);
 
-   isRunning = false;
+    if (close(sockfd) < 0)
+        throw new ServerException(FAILED_TO_CLOSE_SERVER_SOCKET);
+    
+    isRunning = false;
 }

@@ -1,6 +1,6 @@
 CC=gcc
 CPP=g++
-IDIR=include ../include/ ../FilePacket/include ../FileReadWriter/include
+IDIR=include ../Error/include ../FilePacket/include ../FileReadWriter/include
 ODIR=obj
 LDIR=lib
 SDIR=src
@@ -11,7 +11,7 @@ LIBNAME=libgocpclient
 CLIENT_SOURCES=$(wildcard $(SDIR)/*.cpp)
 CLIENT_OBJECTS=$(patsubst $(SDIR)/%.cpp, $(ODIR)/%.o, $(CLIENT_SOURCES))
 
-CLIENT_DLIB_SOURCES = $(CLIENT_SOURCES) ../FilePacket/src/*.cpp ../FileReadWriter/src/*.cpp
+CLIENT_DLIB_SOURCES = $(CLIENT_SOURCES) ../FilePacket/src/*.cpp ../FileReadWriter/src/*.cpp ../Error/src/*.cpp
 
 CLIENT_DEPS = $(patsubst %, %/*, $(IDIR)) 
 
