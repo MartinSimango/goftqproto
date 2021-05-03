@@ -13,7 +13,7 @@ void DestroyFileServer(void* fs);
 
 void* StartServer(void* fs, int connections);
 
-bool Accept(void* fs);
+void* Accept(void* fs);
 
 void* CloseFileServer(void* fs);
 

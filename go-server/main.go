@@ -11,17 +11,36 @@ func main() {
 
 	fs := fileServer.NewFileServer(3000, "")
 
-	fs.StartServer(5)
+	cerr := fs.StartServer(5)
+
+	if cerr != nil {
+		fmt.Println(cerr.Error())
+		cerr.Free()
+		os.Exit(1)
+	}
 
 	fmt.Println("[Server...] " + "Server started...")
 
-	if !fs.Accept() {
-		fmt.Println("[Server...] " + fs.GetErrorMessage())
-		os.Exit(-1)
+	accepted, cerr := fs.Accept()
+
+	if cerr != nil {
+		fmt.Println(cerr.Error())
+		os.Exit(1)
 	}
+
+	if !accepted { //TODO throw exception if accepted=false?
+		fmt.Println("Could not accept!")
+		os.Exit(1)
+	}
+
 	fmt.Println("[Server...] " + "Closing server")
 
-	fs.Close()
+	cerr = fs.Close()
+
+	if cerr != nil {
+		fmt.Println(cerr.Error())
+		os.Exit(1)
+	}
 
 	fmt.Println("[Server...] " + "Program succeeded")
 }

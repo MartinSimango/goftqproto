@@ -30,7 +30,7 @@ void* StartServer(void* fs, int connections){
     return dynamic_cast<ErrorBase*>(error);
 }
 
-bool Accept(void* fs){
+void* Accept(void* fs){
     Error<bool, FileServer> * error = new Error<bool, FileServer>(&FileServer::Accept, AsFileServer(fs));
     
     try {

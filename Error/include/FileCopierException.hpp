@@ -13,13 +13,4 @@ namespace fce {
         
     };
 
-    static FileCopierException* AsFileCopierException(void* fce){
-        return reinterpret_cast<FileCopierException*>(fce);
-    }
-
-
-    static char* SetErrorMessage(char *errorMessage, void * exception) {
-        return AsFileCopierException(exception)->getErrorMessage(errorMessage);
-    }
-
 }

@@ -26,7 +26,7 @@ namespace ftc {
         bool isConnected, mode;
         int sockfd;
         const char * errorMessage;
-        char requestFileName[MAX_FILEPATH_LENGTH];
+        char requestFileName[MAX_FILEPATH_LENGTH], filename[MAX_FILEPATH_LENGTH];
         FileReadWriter *frw;
     
 
@@ -56,7 +56,7 @@ namespace ftc {
         // requestToServer makes a request to the server to see if it can read or write to the server
         inline bool requestToServer(bool create = false){
             
-            int fileSize = (mode == WRITE) ? FileReadWriter::GetFileSize(this->requestFileName): -1;
+            int fileSize = (mode == WRITE) ? FileReadWriter::GetFileSize(this->filename): -1;
 
             RequestPacket requestPacket(sockfd, mode, requestFileName, fileSize, create);
             requestPacket.WritePacket();
@@ -97,7 +97,7 @@ namespace ftc {
             //write file packet to server
             FilePacket packet(sockfd, dataRead, numberOfBytesRead, fileConfigPacket->offset);    
             packet.WritePacket(); 
-            
+
             return numberOfBytesRead;      
         }
         
@@ -118,8 +118,9 @@ namespace ftc {
 
         // if writing to server filename will be file we want to read from
         // if reading from server filename will be file we want to write to
-        FileClient(bool mode, char * requestFileName, char * filename = NULL): errorMessage(NULL), mode(mode) {
-            frw = new FileReadWriter( (!filename) ? requestFileName : filename, !mode); // ! request.mode because if you are writing to server you are reading from client
+        FileClient(bool mode, char * requestFileName, char * filename): errorMessage(NULL), mode(mode) {
+            frw = new FileReadWriter(filename, !mode); // ! request.mode because if you are writing to server you are reading from client
+            strncpy(this->filename, filename, sizeof(this->filename));
             strncpy(this->requestFileName, requestFileName, sizeof(this->requestFileName));
         }
 

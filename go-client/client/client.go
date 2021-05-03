@@ -16,7 +16,7 @@ const READ = int(C.READ)
 const WRITE = int(C.WRITE)
 
 type FileClient interface {
-	Connect(address string, port int) cerror.CError
+	Connect(address string, port int, create bool) cerror.CError
 	Process(offset, numberOfBytesRead int) (int, cerror.CError)
 	Close() cerror.CError
 	Free()
@@ -42,11 +42,10 @@ func (fc FileClientImpl) Free() {
 }
 
 // Close closes the connection to the server, returns false upon failure
-func (fc FileClientImpl) Connect(address string, port int) cerror.CError {
-	cerr := cerror.CErrorImpl{} // TODO need to free this
+func (fc FileClientImpl) Connect(address string, port int, create bool) cerror.CError {
 
-	cerr.Ptr = C.Connect(fc.ptr, C.CString(address), C.int(port), C.bool(false))
-
+	cerr := cerror.CErrorImpl{}
+	cerr.Ptr = C.Connect(fc.ptr, C.CString(address), C.int(port), C.bool(create))
 	errorMessage := cerr.GetErrorMessage()
 
 	if errorMessage != nil {
@@ -72,7 +71,7 @@ func (fc FileClientImpl) Process(offset, numberOfBytesRead int) (int, cerror.CEr
 
 // Close closes the connection to the server, returns false upon failure
 func (fc FileClientImpl) Close() cerror.CError {
-	cerr := cerror.CErrorImpl{} // TODO need to free this
+	cerr := cerror.CErrorImpl{}
 	cerr.Ptr = C.CloseFileClient(fc.ptr)
 	errorMessage := cerr.GetErrorMessage()
 	if errorMessage != nil {

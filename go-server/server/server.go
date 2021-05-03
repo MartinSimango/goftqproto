@@ -1,6 +1,10 @@
 package server
 
-import "unsafe"
+import (
+	"unsafe"
+
+	"github.com/MartinSimango/FileCopier/go-error/cerror"
+)
 
 // #cgo CFLAGS:  -I${SRCDIR}/../../FileServer/include -I../../FilePacket/include -I../../include
 // #cgo LDFLAGS: -L${SRCDIR}/../../FileServer/lib -lgocpserver
@@ -11,10 +15,9 @@ const READ = int(C.READ)
 const WRITE = int(C.WRITE)
 
 type FileServer interface {
-	StartServer(connections int)
-	Accept() bool
-	Close()
-	GetErrorMessage() string
+	StartServer(connections int) cerror.CError
+	Accept() (bool, cerror.CError)
+	Close() cerror.CError
 	Free()
 }
 
@@ -37,21 +40,42 @@ func (fs *FileServerImpl) Free() {
 	C.DestroyFileServer(fs.ptr)
 }
 
-func (fs *FileServerImpl) StartServer(connections int) {
-	C.StartServer(fs.ptr, C.int(connections))
+func (fs *FileServerImpl) StartServer(connections int) cerror.CError {
+	cerr := cerror.CErrorImpl{}
+	cerr.Ptr = C.StartServer(fs.ptr, C.int(connections))
+	errorMessage := cerr.GetErrorMessage()
+	if errorMessage != nil {
+		return cerr
+	}
+	cerr.Free()
+	return nil
+
 }
 
 // Accepts waits and accepts a client connection
-func (fs *FileServerImpl) Accept() bool {
-	return bool(C.Accept(fs.ptr))
+func (fs *FileServerImpl) Accept() (bool, cerror.CError) {
+	cerr := cerror.CErrorImpl{}
+	cerr.Ptr = C.Accept(fs.ptr)
+	errorMessage := cerr.GetErrorMessage()
+
+	if errorMessage != nil {
+		return false, cerr
+	}
+
+	retVal := cerr.GetFuncReturnValue().(bool)
+	cerr.Free()
+
+	return retVal, nil
 }
 
 // Close closes the connection to the server, returns false upon failure
-func (fs *FileServerImpl) Close() {
-	C.CloseFileServer(fs.ptr)
-}
-
-// GetErrorMessge returns the errorMessage
-func (fs *FileServerImpl) GetErrorMessage() string {
-	return C.GoString(C.GetServerErrorMessage(fs.ptr))
+func (fs *FileServerImpl) Close() cerror.CError {
+	cerr := cerror.CErrorImpl{}
+	cerr.Ptr = C.CloseFileServer(fs.ptr)
+	errorMessage := cerr.GetErrorMessage()
+	if errorMessage != nil {
+		return cerr
+	}
+	cerr.Free()
+	return nil
 }

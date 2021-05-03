@@ -21,7 +21,7 @@ class ServerException : public fce::FileCopierException {
         }
 
         char * getErrorMessage(char * error) override {
-            sprintf(error, "[ServerException] Error: %s\n", this->error);
+            sprintf(error, "[ServerException] Error: %s", this->error);
             return error;
         }
 };
