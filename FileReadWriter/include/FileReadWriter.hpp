@@ -37,6 +37,7 @@ private:
             throw new FRWException(INVALID_FILE_SIZE, this->filename);
 
         // 0666 is to give all reading and writing permissions
+        // TODO check why files arent being created with this permission
         if ( (this->fd = open(this->filename, O_CREAT | O_TRUNC | O_WRONLY, 0666) ) < 0) 
             throw new FRWException(FAILED_TO_OPEN_FILE_FOR_WRITING, this->filename);
 

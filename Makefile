@@ -40,7 +40,7 @@ docker-push:
 	docker push martinsimango/gocpserver:latest
 
 docker-run-server:
-	docker run -p 3000:3000 -it -v /:/host/ martinsimango/gocpserver:latest
+	docker run -p 3000:3000 -it -v /:/host/ --env-file .env --name=gocpserver martinsimango/gocpserver:latest
 
 clean:
 	$(MAKE) clean -C FileReadWriter

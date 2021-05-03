@@ -25,7 +25,7 @@ $(FRW_OBJECTS): $(ODIR)/%.o : $(SDIR)/%.cpp $(FRW_DEPS)
 
 build-lib: $(FRW_OBJECTS)
 	ar -crs $(LDIR)/$(LIBNAME).a $(FRW_OBJECTS) #build the static library
-	$(CPP) -shared -fPIC -o $(LDIR)/$(LIBNAME).so $(FRW_OBJECTS) $(CFLAGS) #build dynamic library
+	$(CPP) -shared -fPIC -o $(LDIR)/$(LIBNAME).so $(FRW_DLIB_SOURCES) $(CFLAGS) #build dynamic library
 
 
 clean:

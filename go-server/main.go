@@ -9,7 +9,8 @@ import (
 
 func main() {
 
-	fs := fileServer.NewFileServer(3000, "")
+	rootFolder := os.Getenv("ROOT_FOLDER")
+	fs := fileServer.NewFileServer(3000, rootFolder)
 
 	cerr := fs.StartServer(5)
 
