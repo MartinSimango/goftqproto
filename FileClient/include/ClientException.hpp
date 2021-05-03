@@ -10,8 +10,6 @@ static const char * CLIENT_ALREADY_CONNECTED = "The client is already connected 
 static const char * FAILED_TO_CLOSE_CLIENT_SOCKET = "Failed to close the client socket.";
 
 
-
-
 class ClientException : public fce::FileCopierException {
     
     private:

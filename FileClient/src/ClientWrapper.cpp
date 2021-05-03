@@ -56,6 +56,19 @@ void* Process(void* fc, int offset, int numberOfBytesRead){
     return dynamic_cast<ErrorBase*>(error);
 }
 
+void * GetFileClientFileSize(void *fc) {
+    Error<int, FileClient> * error = new Error<int, FileClient>(&FileClient::GetFileSize, AsFileClient(fc));
+    try {
+        error->Execute();
+    }
+    catch(fce::FileCopierException* e) {
+        error->SetErrorMessage(&fce::FileCopierException::getErrorMessage, e);
+        delete e;
+    }
+
+    return dynamic_cast<ErrorBase*>(error);
+}
+
 // CloseFileClient closes the connection to the server, returns false upon failure
 void * CloseFileClient(void* fc){
     Error<void, FileClient> * error = new Error<void, FileClient>(&FileClient::Close, AsFileClient(fc));

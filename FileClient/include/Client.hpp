@@ -24,7 +24,7 @@ namespace ftc {
         
         private:
         bool isConnected, mode;
-        int sockfd;
+        int sockfd, fileSize;
         const char * errorMessage;
         char requestFileName[MAX_FILEPATH_LENGTH], filename[MAX_FILEPATH_LENGTH];
         FileReadWriter *frw;
@@ -56,19 +56,24 @@ namespace ftc {
         // requestToServer makes a request to the server to see if it can read or write to the server
         inline bool requestToServer(bool create = false){
             
-            int fileSize = (mode == WRITE) ? FileReadWriter::GetFileSize(this->filename): -1;
+            this->fileSize = (this->mode == WRITE) ? FileReadWriter::GetFileSize(this->filename): -1;
 
-            RequestPacket requestPacket(sockfd, mode, requestFileName, fileSize, create);
+            RequestPacket requestPacket(sockfd, mode, requestFileName, this->fileSize, create);
             requestPacket.WritePacket();
     
 
             ResponsePacket responsePacket(sockfd);
             responsePacket.ReadIntoPacket();
-
+            
             //read back what server says
+            if (this->mode == READ){
+                this->fileSize = responsePacket.fileSize;
+            }
+
             if (responsePacket.status == OK){
                 return true;
             }
+
             //TODO accomodate for different status
             return false;
 
@@ -137,8 +142,7 @@ namespace ftc {
         // returns the number of bits written or read to the server depending on the mode
         int Process(int offset, int numberOfBytesRead);
 
-        // GetErrorMessge returns the errorMessage 
-        const char * GetErrorMessage() const;
+        int GetFileSize();
         
         // Close closes the connection to the server, returns false upon failure
         void Close();

@@ -18,6 +18,7 @@ type FileServer interface {
 	StartServer(connections int) cerror.CError
 	Accept() (bool, cerror.CError)
 	Close() cerror.CError
+	GetFileSize() (int, cerror.CError)
 	Free()
 }
 
@@ -65,6 +66,19 @@ func (fs *FileServerImpl) Accept() (bool, cerror.CError) {
 	retVal := cerr.GetFuncReturnValue().(bool)
 	cerr.Free()
 
+	return retVal, nil
+}
+
+func (fs *FileServerImpl) GetFileSize() (int, cerror.CError) {
+	cerr := cerror.CErrorImpl{}
+	cerr.Ptr = C.GetFileServerFileSize(fs.ptr)
+	errorMessage := cerr.GetErrorMessage()
+	if errorMessage != nil {
+		return -1, cerr
+	}
+
+	retVal := cerr.GetFuncReturnValue().(int)
+	cerr.Free()
 	return retVal, nil
 }
 

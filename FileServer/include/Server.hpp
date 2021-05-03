@@ -144,7 +144,8 @@ namespace fts {
         void StartServer(int connections);
 
         bool Accept();
-        // writeToServer writes to the server
+
+        int GetFileSize();
 
         void Close();
 

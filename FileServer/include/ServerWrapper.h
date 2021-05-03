@@ -15,6 +15,8 @@ void* StartServer(void* fs, int connections);
 
 void* Accept(void* fs);
 
+void * GetFileServerFileSize(void *fs);
+
 void* CloseFileServer(void* fs);
 
 #ifdef __cplusplus

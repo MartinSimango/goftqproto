@@ -22,9 +22,13 @@ int FileClient::Process(int offset, int numberOfBytesRead){
     return (mode == READ) ? readFromServer(&packet): writeToServer(&packet);
 }
 
-const char * FileClient::GetErrorMessage() const {
-    return errorMessage;
+int FileClient::GetFileSize() {
+    if (!isConnected && mode == READ)
+        throw new ClientException(CLIENT_NOT_CONNECTED);
+        
+    return fileSize;
 }
+
 
 void FileClient::Close() {
     if (!isConnected)

@@ -43,6 +43,21 @@ void* Accept(void* fs){
     return dynamic_cast<ErrorBase*>(error);
 }
 
+
+void * GetFileServerFileSize(void *fs) {
+    Error<int, FileServer> * error = new Error<int, FileServer>(&FileServer::GetFileSize, AsFileServer(fs));
+    try {
+        error->Execute();
+    }
+    catch(fce::FileCopierException* e) {
+        error->SetErrorMessage(&fce::FileCopierException::getErrorMessage, e);
+        delete e;
+    }
+
+    return dynamic_cast<ErrorBase*>(error);
+}
+
+
 void* CloseFileServer(void* fs){
     Error<void, FileServer> * error = new Error<void, FileServer>(&FileServer::Close, AsFileServer(fs));
     

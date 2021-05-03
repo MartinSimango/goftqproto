@@ -20,7 +20,15 @@ func main() {
 	}
 
 	fmt.Println("[Client...] " + "Processing...")
-	bytes, cerr := fc.Process(0, 20)
+
+	fileSize, cerr := fc.GetFileSize()
+
+	if cerr != nil {
+		fmt.Println(cerr.Error())
+		os.Exit(1)
+	}
+
+	bytes, cerr := fc.Process(0, fileSize)
 
 	if cerr != nil {
 		fmt.Println(cerr.Error())

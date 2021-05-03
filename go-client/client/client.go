@@ -19,6 +19,7 @@ type FileClient interface {
 	Connect(address string, port int, create bool) cerror.CError
 	Process(offset, numberOfBytesRead int) (int, cerror.CError)
 	Close() cerror.CError
+	GetFileSize() (int, cerror.CError)
 	Free()
 }
 
@@ -59,6 +60,19 @@ func (fc FileClientImpl) Connect(address string, port int, create bool) cerror.C
 func (fc FileClientImpl) Process(offset, numberOfBytesRead int) (int, cerror.CError) {
 	cerr := cerror.CErrorImpl{}
 	cerr.Ptr = C.Process(fc.ptr, C.int(offset), C.int(numberOfBytesRead))
+	errorMessage := cerr.GetErrorMessage()
+	if errorMessage != nil {
+		return -1, cerr
+	}
+
+	retVal := cerr.GetFuncReturnValue().(int)
+	cerr.Free()
+	return retVal, nil
+}
+
+func (fc FileClientImpl) GetFileSize() (int, cerror.CError) {
+	cerr := cerror.CErrorImpl{}
+	cerr.Ptr = C.GetFileClientFileSize(fc.ptr)
 	errorMessage := cerr.GetErrorMessage()
 	if errorMessage != nil {
 		return -1, cerr

@@ -31,6 +31,13 @@ bool FileServer::Accept(){
     return true;
 }
 
+int FileServer::GetFileSize() {
+    if (!isRunning && mode == READ)
+        throw new ServerException(SERVER_NOT_RUNNING);
+
+    return fileSize;
+}
+
 void FileServer::Close(){
     if (!isRunning)
         throw new ServerException(SERVER_NOT_RUNNING);

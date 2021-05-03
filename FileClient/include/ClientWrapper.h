@@ -18,8 +18,11 @@ void * Connect(void* fc,char * serverAddress, int port, bool create);
 // returns the number of bits written or read to the server depending on the mode
 void * Process(void* fc,int offset, int numberOfBytesRead);
 
+void * GetFileClientFileSize(void *fc);
+
 // CloseFileClient closes the connection to the server, returns false upon failure
 void * CloseFileClient(void* fc);
+
 
 #ifdef __cplusplus
 }  // extern "C"

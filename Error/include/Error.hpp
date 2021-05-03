@@ -7,6 +7,7 @@
 #include <Delegate.hpp>
 #include <ErrorBase.hpp>
 
+//TODO add support for const functions
 
 template<typename RetVal, typename Object, typename... Args>
 class Error: public Delegate<RetVal, Args...>, public ErrorBase {
