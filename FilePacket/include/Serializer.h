@@ -4,7 +4,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
-#include <iostream>
 // Below functions are based from https://stackoverflow.com/questions/1577161/passing-a-structure-through-sockets-in-c
 
 inline unsigned char * serialize_int_big_endian(unsigned char *buffer, int value)
@@ -14,6 +13,7 @@ inline unsigned char * serialize_int_big_endian(unsigned char *buffer, int value
   buffer[1] = value >> 16; // get second byte of int
   buffer[2] = value >> 8;  // get third byte of int
   buffer[3] = value;    //get fouth byte of int
+  
   return buffer + 4;
 }
 
