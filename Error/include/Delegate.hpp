@@ -1,6 +1,6 @@
 #pragma once
 
-//Code below from
+//Code below from influenced from:
 //https://simoncoenen.com/blog/programming/CPP_Delegates#:~:text=Usage-,Delegate,reference%20count%20of%20a%20shared_ptr.
 
 template<typename RetVal, typename Object, typename ...Args>
@@ -22,5 +22,6 @@ class Delegate
 {
 public:
     
-    virtual RetVal Execute(Args... args) = 0;
+    virtual void Execute(Args... args) = 0;
+
 };

@@ -27,16 +27,9 @@ void * Connect(void* fc, char * serverAddress, int port, bool create) {
     strncpy(serverPort.serverAddress, serverAddress, sizeof(serverPort.serverAddress));
     
     Error<void,FileClient,ServerPort, bool> * error = new Error<void, FileClient, ServerPort, bool>(&FileClient::Connect, AsFileClient(fc));
+    error->Execute(serverPort, create);
 
-    try {
-        error->Execute(serverPort, create);
-    }
-    catch(fce::FileCopierException* e) {
-        error->SetErrorMessage(&fce::FileCopierException::getErrorMessage, e);
-        delete e;
-    }
     return dynamic_cast<ErrorBase*>(error);
-
 }
 
 
@@ -45,41 +38,20 @@ void * Connect(void* fc, char * serverAddress, int port, bool create) {
 // returns the number of bits written or read to the server depending on the mode
 void* Process(void* fc, int offset, int numberOfBytesRead){
     Error<int, FileClient, int, int> * error = new Error<int, FileClient, int, int>(&FileClient::Process, AsFileClient(fc));
-    
-    try {
-         error->Execute(offset, numberOfBytesRead);
-    }
-    catch(fce::FileCopierException* e) {
-        error->SetErrorMessage(&fce::FileCopierException::getErrorMessage, e);
-        delete e;
-    }
+    error->Execute(offset, numberOfBytesRead);
     return dynamic_cast<ErrorBase*>(error);
 }
 
 void * GetFileClientFileSize(void *fc) {
     Error<int, FileClient> * error = new Error<int, FileClient>(&FileClient::GetFileSize, AsFileClient(fc));
-    try {
-        error->Execute();
-    }
-    catch(fce::FileCopierException* e) {
-        error->SetErrorMessage(&fce::FileCopierException::getErrorMessage, e);
-        delete e;
-    }
-
+    error->Execute();
     return dynamic_cast<ErrorBase*>(error);
 }
 
 // CloseFileClient closes the connection to the server, returns false upon failure
 void * CloseFileClient(void* fc){
-    Error<void, FileClient> * error = new Error<void, FileClient>(&FileClient::Close, AsFileClient(fc));
-    try {
-        error->Execute();
-    }
-    catch(fce::FileCopierException* e) {
-        error->SetErrorMessage(&fce::FileCopierException::getErrorMessage, e);
-        delete e;
-    }
-
+    Error<void, FileClient> * error = new Error<void, FileClient>(&FileClient::Close, AsFileClient(fc)); 
+    error->Execute();
     return dynamic_cast<ErrorBase*>(error);
 }
 

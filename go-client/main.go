@@ -23,6 +23,8 @@ func main() {
 
 	fileSize, cerr := fc.GetFileSize()
 
+	fmt.Println("FILE size: ", fileSize)
+
 	if cerr != nil {
 		fmt.Println(cerr.Error())
 		os.Exit(1)

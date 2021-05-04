@@ -6,7 +6,7 @@
 #include <iostream>
 #include <Error.hpp>
 
-//TODO partial template decrease code size
+//TODO partial template decrease code size by using inheritance maybe
 
 template<typename Object, typename... Args>
 class Error<void, Object, Args...> : public Delegate<void, Args...>, public ErrorBase {
@@ -19,29 +19,39 @@ class Error<void, Object, Args...> : public Delegate<void, Args...>, public Erro
         MemberFunctionPtrType memberFunctionPtr;
         FunctionPtrType* functionPtr;
     
-    void setFunctionReturnType(){
-        funcReturnType = VOID_TYPE;
-    }
+        void setFunctionReturnType() override {
+            funcReturnType = VOID_TYPE;
+        }
 
 
     public:
 
-    explicit Error (MemberFunctionPtrType delegateFunc, Object * obj) : ErrorBase(), memberFunctionPtr(delegateFunc), object(obj) {
-        setFunctionReturnType(); // used for ErrorWrapper
-    }
+        explicit Error (MemberFunctionPtrType delegateFunc, Object * obj) : ErrorBase(), memberFunctionPtr(delegateFunc), object(obj) {
+            setFunctionReturnType(); // used for ErrorWrapper
+        }
 
 
-    ~Error() {
-        std::cout << "DESTRUCTIONG Void" <<std::endl;
-        delete errorMessage;
-        errorMessage = NULL;
-    }
-   
+        ~Error() {
+            delete errorMessage;
+            errorMessage = NULL;
+        }
+    
 
-    virtual void Execute(Args... args) override
-    {   
-         (object->*memberFunctionPtr)(std::forward<Args>(args)...);
-    }
+        virtual void Execute(Args... args) override
+        {   
+            try {
+                (object->*memberFunctionPtr)(std::forward<Args>(args)...);
+            }  
+            catch(exep::Exception *e){
+                errorMessage = new char[ERROR_MAX_LENGTH];
+                e->getErrorMessage(errorMessage);
+                delete e;
+            }
+        }
+
+        void getFunctionReturnValue(){
+            //do Nothing
+        }
     
 };
 

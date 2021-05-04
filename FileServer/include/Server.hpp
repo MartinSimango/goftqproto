@@ -107,7 +107,6 @@ namespace fts {
                     
 
                 responsePacket.status = FileReadWriter::CheckFile(requestPacket.filepath, requestPacket.mode);
-                
                 if (responsePacket.status == OK ) {
 
                     if (mode == WRITE) {

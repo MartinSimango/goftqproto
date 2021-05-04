@@ -2,12 +2,12 @@
 #include <iostream>
 #include <exception>
 
-namespace fce {
+namespace exep {
 
-    class FileCopierException : public std::exception {
+    class Exception : public std::exception {
         
         public:
-            FileCopierException() : std::exception(){}
+            Exception() : std::exception(){}
             
             virtual char * getErrorMessage(char * error) = 0;
         

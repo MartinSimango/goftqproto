@@ -1,5 +1,5 @@
 #pragma once
-#include <FileCopierException.hpp>
+#include <Exception.hpp>
 
 static const char * FAILED_TO_BIND_SERVER_SOCKET = "Failed to bind the server socket.";
 static const char * FAILED_TO_CREATE_SERVER_SOCKET = "Failed to create the server socket!";
@@ -8,13 +8,13 @@ static const char * SERVER_NOT_RUNNING = "The server is not running!";
 static const char * FAILED_TO_CLOSE_SERVER_SOCKET = "Failed to close the server socket.";
 
 
-class ServerException : public fce::FileCopierException {
+class ServerException : public exep::Exception {
     
     private:
 	    const char* error;
     
     public:
-        ServerException(const char *error) : fce::FileCopierException(), error(error){}
+        ServerException(const char *error) : exep::Exception(), error(error){}
     	
         const char * what() const throw() override {
             return error;   

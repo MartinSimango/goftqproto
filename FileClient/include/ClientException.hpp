@@ -1,5 +1,5 @@
 #pragma once
-#include <FileCopierException.hpp>
+
 
 static const char * FAILED_TO_BIND_SERVER_SOCKET = "Failed to bind the server socket.";
 static const char * FAILED_TO_CONNECT_TO_SERVER = "Failed to connect to the server.";
@@ -10,13 +10,13 @@ static const char * CLIENT_ALREADY_CONNECTED = "The client is already connected 
 static const char * FAILED_TO_CLOSE_CLIENT_SOCKET = "Failed to close the client socket.";
 
 
-class ClientException : public fce::FileCopierException {
+class ClientException : public exep::Exception {
     
     private:
 	    const char* error;
     
     public:
-        ClientException(const char *error) : fce::FileCopierException(), error(error){}
+        ClientException(const char *error) : exep::Exception(), error(error){}
     	
         const char * what() const throw() override {
             return error;   
