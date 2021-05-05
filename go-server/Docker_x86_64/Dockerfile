@@ -1,4 +1,4 @@
-FROM martinsimango/filecopierbase:ARM_latest
+FROM martinsimango/filecopierbase:x86_64_latest
 
 FROM scratch 
 

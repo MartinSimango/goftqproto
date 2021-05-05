@@ -37,7 +37,7 @@ docker-build-arm:
 
 docker-build-x86_64:
 	docker build -t martinsimango/filecopierbase:x86_64_latest .
-	docker build -f go-server/Dockerfile -t martinsimango/gocpserver:x86_64_latest .
+	docker build -f go-server/Dockerfile_x86_64/Dockerfile -t martinsimango/gocpserver:x86_64_latest .
 
 docker-push-arm:
 	docker push martinsimango/filecopierbase:ARM_latest
