@@ -31,16 +31,24 @@ run: install
 	go-server & go-client
 
 # --- Docker related ---
-docker-build:
-	docker build -t martinsimango/filecopierbase:latest .
-	docker build -f go-server/Dockerfile  -t martinsimango/gocpserver:latest .
+docker-build-arm:
+	docker build -t martinsimango/filecopierbase:ARM_latest.
+	docker build -f go-server/Dockerfile -t martinsimango/gocpserver:ARM_latest.
 
-docker-push:
-    docker push martinsimango/filecopierbase:latest
-	docker push martinsimango/gocpserver:latest
+docker-build-x86_64:
+	docker build -t martinsimango/filecopierbase:x86_64_latest .
+	docker build -f go-server/Dockerfile -t martinsimango/gocpserver:x86_64_latest .
+
+docker-push-arm:
+	docker push martinsimango/filecopierbase:ARM_latest
+	docker push martinsimango/gocpserver:ARM_latest
+
+docker-push-x86_64:
+	docker push martinsimango/filecopierbase:x86_64_latest
+	docker push martinsimango/gocpserver:x86_64_latest
 
 docker-run-server:
-	docker run -p 3000:3000 -it -v /:/host/ --env-file .env --name=gocpserver martinsimango/gocpserver:latest
+	docker run -p 3000:3000 -it -v /:/host/ --env-file .env --name=gocpserver martinsimango/gocpserver
 
 clean:
 	$(MAKE) clean -C FileReadWriter

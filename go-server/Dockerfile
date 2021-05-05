@@ -8,5 +8,4 @@ WORKDIR /app
 COPY --from=0 /go/bin/go-server go-server
 COPY --from=0 /go-server-dylibs/* /lib/
 
-
 ENTRYPOINT ["/app/go-server"]
