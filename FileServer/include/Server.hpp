@@ -13,7 +13,7 @@
 #include <string>
 #include <ServerException.hpp>
 
-using namespace packet;
+using namespace request;
 
 //TODO find duplicated methods in Server and Client and make that method in shared class
 namespace fts {
@@ -41,7 +41,8 @@ namespace fts {
 
             FileReadWriter *frw;
             int sockfd, connfd, port, fileSize;
-            bool mode, isRunning;
+            Mode::Type mode;
+            bool isRunning;
             char filepath[MAX_FILEPATH_LENGTH], rootFolder[20]; // TODO make 20 constant
         
             // TODO be able to have protocol specificied
@@ -70,13 +71,14 @@ namespace fts {
                 int bytesRead = readFromFile(buffer, &fileConfigPacket);
 
                 FilePacket filePacket(connfd, buffer, bytesRead, fileConfigPacket.offset);
-                filePacket.WritePacket();
+                filePacket.WriteRequest();
             }
             
             inline void readFromClient() {
-                FilePacket packet(connfd);
-                packet.ReadIntoPacket();
-                writeToFile(packet.data, packet.numberOfBytesRead, packet.offset);
+                FilePacket request(connfd);
+                request.ReadRequest();
+                writeToFile(request.data, request.numberOfBytesRead, request.offset);
+                //write(connfd, 1,)
             }
 
             inline int readFromFile(char * buffer, FileConfigPacket * fileConfigPacket) {
@@ -96,7 +98,7 @@ namespace fts {
             inline ClientRequest handleClientRequest(){
                 
                 RequestPacket requestPacket(connfd);
-                requestPacket.ReadIntoPacket();
+                requestPacket.ReadRequest();
 
                 this->mode = requestPacket.mode;
 
@@ -117,7 +119,7 @@ namespace fts {
                     }
                 }
                 
-                responsePacket.WritePacket();
+                responsePacket.WriteRequest();
                 struct ClientRequest clientRequest(requestPacket.createFile, responsePacket.status);
 
                 return clientRequest;

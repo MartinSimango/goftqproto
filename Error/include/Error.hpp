@@ -69,7 +69,7 @@ class Error: public Delegate<RetVal, Args...>, public ErrorBase {
             delete tempVal;
                 
          }
-         catch(exep::Exception *e){
+         catch(error::Exception *e){
             errorMessage = new char[ERROR_MAX_LENGTH];
             e->getErrorMessage(errorMessage);
             retVal = tempVal;

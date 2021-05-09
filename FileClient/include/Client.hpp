@@ -7,10 +7,12 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <FileReadWriter.hpp>
-#include <Packets.hpp>
 #include <ClientException.hpp>
+#include <Request.hpp>
 
-using namespace packet;
+using namespace request;
+using namespace request;
+
 namespace ftc {
 
 
@@ -27,7 +29,6 @@ namespace ftc {
         int sockfd, fileSize;
         const char * errorMessage;
         char requestFileName[MAX_FILEPATH_LENGTH], filename[MAX_FILEPATH_LENGTH];
-        FileReadWriter *frw;
     
 
         // TODO be able to have protocol specificied
@@ -59,11 +60,11 @@ namespace ftc {
             this->fileSize = (this->mode == WRITE) ? FileReadWriter::GetFileSize(this->filename): -1;
 
             RequestPacket requestPacket(sockfd, mode, requestFileName, this->fileSize, create);
-            requestPacket.WritePacket();
+            requestPacket.WriteRequest();
     
 
             ResponsePacket responsePacket(sockfd);
-            responsePacket.ReadIntoPacket();
+            responsePacket.ReadRequest();
             
             //read back what server says
             if (this->mode == READ){
@@ -79,65 +80,62 @@ namespace ftc {
 
         }
 
-        // opens the requestPacket file that you are reading from or writing to
-        inline void openFile(bool create = false){
-            frw->Open(create);
+     
+        inline void createFile(char *filename){
+
         }
 
-        inline int readFromFile(char * buffer, FileConfigPacket * fileConfigPacket) {
-            return frw->ReadFromFile(buffer, fileConfigPacket->numberOfBytesToRead, fileConfigPacket->offset);
-        }
-        inline int writeToFile(char *buffer, int bytesToWrite, int offset) {
-            return frw->WriteToFile(buffer, bytesToWrite, offset); 
-        }
+      
 
          // writeToServer writes to the server and reads from the client, returns false upon failure
-        inline int writeToServer(FileConfigPacket *fileConfigPacket){
-            char dataRead[fileConfigPacket->numberOfBytesToRead];
-            int numberOfBytesRead;
+        inline int writeToServer(FileReadWriter * frw, char * filepath,int numberOfBytesToWrite, int offset) {
+            char dataRead[numberOfBytesToWrite];
 
-            numberOfBytesRead = readFromFile(dataRead, fileConfigPacket);
-            
-            //TODO accomdate for when data is finished being raed
-            //write file packet to server
-            FilePacket packet(sockfd, dataRead, numberOfBytesRead, fileConfigPacket->offset);    
-            packet.WritePacket(); 
+            int numberOfBytesRead = frw->ReadFromFile(dataRead, numberOfBytesToWrite, offset);
+           
+            WriteRequest writeRequest(sockfd, dataRead, offset, numberOfBytesRead, filepath);    
+            writeRequest.WriteRequest(); 
 
-            return numberOfBytesRead;      
+            return numberOfBytesRead;
         }
         
         // ReadFromServer reads from the server and writes to the client, returns false upon failure
 
-        inline int readFromServer(FileConfigPacket * fileConfigPacket){
+        inline int readFromServer(FileReadWriter * frw, char * filepath, int numberOfBytesToRead, int offset){
 
             //write to server to tell where to start getting data from
-            fileConfigPacket->WritePacket();          
+            //    ReadRequest(int fd, int offset, int numberOfBytesToRead):
+            ReadRequest readRequest(sockfd, filepath, offset, numberOfBytesToRead);
+            readRequest.WriteRequest();
+            //request.ReadRequest();
 
-            FilePacket packet(sockfd);            
-            packet.ReadIntoPacket();
-
-            return writeToFile(packet.data, packet.numberOfBytesRead, packet.offset);        
+           // int numberOfBytesWritten =  writeToFile(request.data, request.numberOfBytesRead, request.offset);        
         }
 
         public:
 
         // if writing to server filename will be file we want to read from
         // if reading from server filename will be file we want to write to
-        FileClient(bool mode, char * requestFileName, char * filename): errorMessage(NULL), mode(mode) {
-            frw = new FileReadWriter(filename, !mode); // ! request.mode because if you are writing to server you are reading from client
-            strncpy(this->filename, filename, sizeof(this->filename));
-            strncpy(this->requestFileName, requestFileName, sizeof(this->requestFileName));
-        }
+        FileClient() {}
 
-        ~FileClient() {
-            delete frw;
-            frw = NULL;
-        }
+        ~FileClient() {}
 
         // Connect connects the client to the specific server specified by the ServerPort 
         // returns false if connect failed and errorMessage is set
-        void Connect(struct ServerPort serverPort, bool create = false);
+        void Connect(struct ServerPort serverPort);
         
+        void SendCreateRequest(std::vector<request::File> * files);
+
+        void SendGetRequest(char * filepath);
+
+        void SendReadRequest(int numberOfBytesToRead, int offset, char *readFile, char * writeFile);
+
+        void SendWriteRequest(int numberOfBytesToWrite, int offset, char *readFile, char * writeFile);
+        
+        void Send(Request * request);
+
+
+        void Read(Request * request);
         // Process either reads or writes to the server depending on what mode the FileClient is in
         // returns the number of bits written or read to the server depending on the mode
         int Process(int offset, int numberOfBytesRead);

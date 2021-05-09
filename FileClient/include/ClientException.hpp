@@ -10,13 +10,13 @@ static const char * CLIENT_ALREADY_CONNECTED = "The client is already connected 
 static const char * FAILED_TO_CLOSE_CLIENT_SOCKET = "Failed to close the client socket.";
 
 
-class ClientException : public exep::Exception {
+class ClientException : public error::Exception {
     
     private:
 	    const char* error;
     
     public:
-        ClientException(const char *error) : exep::Exception(), error(error){}
+        ClientException(const char *error) : error::Exception(), error(error){}
     	
         const char * what() const throw() override {
             return error;   

@@ -8,13 +8,13 @@ static const char * SERVER_NOT_RUNNING = "The server is not running!";
 static const char * FAILED_TO_CLOSE_SERVER_SOCKET = "Failed to close the server socket.";
 
 
-class ServerException : public exep::Exception {
+class ServerException : public error::Exception {
     
     private:
 	    const char* error;
     
     public:
-        ServerException(const char *error) : exep::Exception(), error(error){}
+        ServerException(const char *error) : error::Exception(), error(error){}
     	
         const char * what() const throw() override {
             return error;   

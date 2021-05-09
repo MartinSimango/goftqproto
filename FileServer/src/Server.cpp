@@ -20,8 +20,10 @@ bool FileServer::Accept(){
     int len = sizeof(client);
     connfd = accept(sockfd, (struct sockaddr*)&client, (socklen_t *) &len);
     
+    while(isRunning) {
+        struct ClientRequest clientRequest = handleClientRequest();
 
-    struct ClientRequest clientRequest = handleClientRequest();
+    }
     if (clientRequest.status != OK) {
         return false;
     }
