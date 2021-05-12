@@ -52,7 +52,6 @@ docker-run-server:
 
 clean:
 	$(MAKE) clean -C FileReadWriter
-	$(MAKE) clean -C FilePacket
 	$(MAKE) clean -C FileClient
 	$(MAKE) clean -C FileServer
 	$(MAKE) clean -C Error
