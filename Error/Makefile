@@ -34,5 +34,5 @@ install:
 	cp $(LDIR)/$(LIBNAME).so /usr/local/lib
 
 clean:
-	rm -rf $(ODIR)/*
-	rm -rf $(LDIR)/*
+	rm -rf $(ODIR)
+	rm -rf $(LDIR)

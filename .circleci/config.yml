@@ -2,11 +2,13 @@ version: 2.1
 
 jobs:
   build:
-    working_directory: ~/circleci-filecopier
-    docker:
-      - image: "circleci/python:3.6.4"
+    # working_directory: ~/circleci-filecopier
+    # docker:
+    #   - image: "circleci/python:3.6.4"
+    machine:
+      image: ubuntu-2004:202101-01
+    resource_class: arm.medium
     steps:
-      - checkout
       - run: make clean install
   # test:
   #   working_directory: ~/circleci-python

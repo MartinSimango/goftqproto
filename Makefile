@@ -1,14 +1,15 @@
+SUBDIRS=Error FileClient FileReadWriter FileServer Request Response Serializer 
+SUBDIRS_CLEAN=$(patsubst %, %.clean, $(SUBDIRS))
 
-# SUBDIRS= FileReadWriter FilePacket FileClient FileServer
+$(SUBDIRS):
+	$(MAKE) -C $(patsubst %,%, $@)
+
+$(SUBDIRS_CLEAN):
+	$(MAKE) clean -C $(patsubst %.clean,%, $@)
 
 build: build-c build-go
 
-build-c:
-	$(MAKE) -C FileReadWriter
-	$(MAKE) -C FilePacket
-	$(MAKE) -C FileClient
-	$(MAKE) -C FileServer
-	$(MAKE) -C Error
+build-c: $(SUBDIRS)
 
 build-go:
 	go build ./...
@@ -22,9 +23,9 @@ install-go:
 
 
 
-# $(SUBDIRS):
-# 	$(MAKE) -C $@
 
+# $(CLIENT_OBJECTS): $(ODIR)/%.o : $(SDIR)/%.cpp $(CLIENT_DEPS)
+# 	$(CPP) -c $< -o $@ $(CFLAGS)
 run: install
 	-killall go-server
 	-killall go-client
@@ -50,8 +51,5 @@ docker-push-x86_64:
 docker-run-server:
 	docker run -p 3000:3000 -it -v /:/host/ --env-file .env --name=gocpserver martinsimango/gocpserver
 
-clean:
-	$(MAKE) clean -C FileReadWriter
-	$(MAKE) clean -C FileClient
-	$(MAKE) clean -C FileServer
-	$(MAKE) clean -C Error
+clean: $(SUBDIRS_CLEAN)
+
