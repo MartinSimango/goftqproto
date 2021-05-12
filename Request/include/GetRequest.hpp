@@ -9,10 +9,10 @@ namespace request {
     private:
         char filepath[MAX_FILEPATH_LENGTH];
     public:
-        GetRequest(int fd): request::Request(fd) {
+        GetRequest(int fd): Request(fd) {
             requestType = RequestType::GET;
         }
-        GetRequest(int fd, char* filepath): request::Request(fd) {
+        GetRequest(int fd, char* filepath): Request(fd) {
             requestType = RequestType::GET;
             strlcpy(this->filepath, filepath, sizeof(this->filepath));
         }
