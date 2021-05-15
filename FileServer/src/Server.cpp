@@ -1,6 +1,5 @@
 #include "Server.hpp"
 
-
 using namespace fts;
 
 // Connect connects the client to the specific server
@@ -23,48 +22,68 @@ void FileServer::Accept(){
     if (connfd < 0) {
         throw new ServerException(FAILED_TO_ACCEPT_CONNECTION);
     }
-    
-}
 
-int FileServer::GetFileSize() {
-    if (!isRunning && mode == Mode::READ)
-        throw new ServerException(SERVER_NOT_RUNNING);
-
-    return fileSize;
 }
 
 void FileServer::Close(){
-    if (!isRunning)
+    if(!isRunning)
         throw new ServerException(SERVER_NOT_RUNNING);
-
+    if (close(connfd) < 0) 
+        throw new ServerException(FAILED_TO_CLOSE_CLIENT_SOCKET);
     if (close(sockfd) < 0)
         throw new ServerException(FAILED_TO_CLOSE_SERVER_SOCKET);
     
     isRunning = false;
 }
 
-Response * FileServer::HandleClientRequest() {
-    RequestHeader *header = new RequestHeader(connfd);
-    header->Read();
-    switch (header->requestType) {
-    case RequestType::CREATE:
-        CreateRequest *request = new CreateRequest(connfd, header);
-        handleRequest(request);
-        break;
-    case RequestType::GET:
-        GetRequest *request = new GetRequest(connfd, header);
-        handleRequest(request);
-        break;
-    case RequestType::READ:
-        ReadRequest *request = new ReadRequest(connfd, header);
-        handleRequest(request);
-        break;
-    case RequestType::WRITE:
-        WriteRequest *request = new WriteRequest(connfd, header);
-        handleRequest(request);
-        break;
-    default:
-        break;
+bool FileServer::HandleClientRequest() {
+    if(!isRunning){
+        throw new ServerException(SERVER_NOT_RUNNING);
     }
+    RequestHeader *header = new RequestHeader(connfd);
+    if (header->Read() == 0) { //read nothing from the client then close the connection with it
+         return false;
+    }
+    std::cout << "HERE " << header->getRequestBodySize() << std::endl;
+    switch (header->requestType) {
+        case RequestType::CREATE: {
+            CreateRequest *request = new CreateRequest(connfd, header);
+            request->ReadBody();
+            handleRequest(request);
+            delete request;
+            break;
+        }
+        case RequestType::GET: {
+            GetRequest *request = new GetRequest(connfd, header);
+            request->ReadBody();
+            handleRequest(request);
+            delete request;
+            break;
+        }
+        case RequestType::READ: {
+            ReadRequest *request = new ReadRequest(connfd, header);
+            request->ReadBody();
+            handleRequest(request);
+            delete request;
+            break;
+        }
+        case RequestType::WRITE: {
+            WriteRequest *request = new WriteRequest(connfd, header);
+            request->ReadBody();
+            handleRequest(request);
+            delete request;
+            break;
+        }
+        default: {//unknown request close connection
+            return false;
+            //todo log unknown request
+        }
+    }
+    return true;
 
 }
+
+bool FileServer::IsServerRunning() {
+    return isRunning;
+}
+

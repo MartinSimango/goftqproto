@@ -1,6 +1,8 @@
 #include <RequestHeader.hpp>
 #include <RequestException.hpp>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 using namespace request;
 
@@ -17,7 +19,6 @@ unsigned char * RequestHeader::serializeRequestHeader(unsigned char *buffer) {
 void RequestHeader::deserializeRequestHeader(unsigned char *buffer) {
     buffer = deserialize_int_big_endian(buffer, &requestBodySize);
     buffer = deserialize_int_big_endian(buffer, (int*)&requestType); 
-
 }
 
 int RequestHeader::getRequestBodySize() const {
@@ -33,6 +34,7 @@ int RequestHeader::Read() {
         throw new RequestException(FAILED_TO_READ_REQUEST_HEADER, this->requestType);
     }
     deserializeRequestHeader(buffer);
+    std::cout << "SIZE: "<< bytes_read  << " " << requestType << std::endl;
 
     return bytes_read;
 }

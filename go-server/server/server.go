@@ -11,14 +11,15 @@ import (
 // #include "ServerWrapper.h"
 import "C"
 
-const READ = int(C.READ)
-const WRITE = int(C.WRITE)
+const READ = int(C.READ_MODE)
+const WRITE = int(C.WRITE_MODE)
 
 type FileServer interface {
 	StartServer(connections int) cerror.CError
-	Accept() (bool, cerror.CError)
+	Accept() cerror.CError
 	Close() cerror.CError
-	GetFileSize() (int, cerror.CError)
+	HandleClientRequest() (bool, cerror.CError)
+	IsServerRunning() (bool, cerror.CError)
 	Free()
 }
 
@@ -54,30 +55,41 @@ func (fs *FileServerImpl) StartServer(connections int) cerror.CError {
 }
 
 // Accepts waits and accepts a client connection
-func (fs *FileServerImpl) Accept() (bool, cerror.CError) {
+func (fs *FileServerImpl) Accept() cerror.CError {
 	cerr := cerror.CErrorImpl{}
 	cerr.Ptr = C.Accept(fs.ptr)
 	errorMessage := cerr.GetErrorMessage()
 
 	if errorMessage != nil {
-		return false, cerr
+		return cerr
 	}
 
-	retVal := cerr.GetFuncReturnValue().(bool)
 	cerr.Free()
 
+	return nil
+}
+
+func (fs *FileServerImpl) HandleClientRequest() (bool, cerror.CError) {
+	cerr := cerror.CErrorImpl{}
+	cerr.Ptr = C.HandleClientRequest(fs.ptr)
+	errorMessage := cerr.GetErrorMessage()
+
+	if errorMessage != nil {
+		return false, cerr
+	}
+	retVal := cerr.GetFuncReturnValue().(bool)
+	cerr.Free()
 	return retVal, nil
 }
 
-func (fs *FileServerImpl) GetFileSize() (int, cerror.CError) {
+func (fs *FileServerImpl) IsServerRunning() (bool, cerror.CError) {
 	cerr := cerror.CErrorImpl{}
-	cerr.Ptr = C.GetFileServerFileSize(fs.ptr)
+	cerr.Ptr = C.IsServerRunning(fs.ptr)
 	errorMessage := cerr.GetErrorMessage()
 	if errorMessage != nil {
-		return -1, cerr
+		return false, cerr
 	}
-
-	retVal := cerr.GetFuncReturnValue().(int)
+	retVal := cerr.GetFuncReturnValue().(bool)
 	cerr.Free()
 	return retVal, nil
 }

@@ -20,7 +20,7 @@ namespace request {
             strlcpy(this->filepath, filepath, sizeof(this->filepath));
         }
 
-        ~GetRequest();
+        ~GetRequest(){}
         
         int getRequestBodySize() const override;
 

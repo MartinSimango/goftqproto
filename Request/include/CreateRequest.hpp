@@ -18,14 +18,22 @@ namespace request {
             return strlen(filename) + 1 + sizeof(fileSize);
         }
 
+        void setFileName(char * filename){
+            strlcpy(this->filename, filename, sizeof(this->filename));
+        }
+
         void deserializeRequestFile(unsigned char *buffer){
             buffer = deserialize_char_array(buffer, filename);
             buffer = deserialize_int_big_endian(buffer, &fileSize); 
+                std::cout << "NUMBER: asf " << filename << " " << fileSize << std::endl;
+
         }
 
         unsigned char * serializeRequestFile(unsigned char *buffer) {
             buffer = serialize_char_array(buffer, filename);
             buffer = serialize_int_big_endian(buffer, fileSize);
+                            std::cout << "NUMBER: asf " << filename << " " << fileSize << std::endl;
+
 
             return buffer;
         }

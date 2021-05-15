@@ -3,18 +3,15 @@
 using namespace response;
 
 int Response::Write() {
-    WriteHeader();
-    WriteBody();
+
+    return WriteHeader() + WriteBody();
 }
 
 int Response::Read() {
-    ReadHeader();
-    ReadBody();
+    return ReadHeader() + ReadBody();
 }
 
-int Response::WriteBody() {
-            
-        
+int Response::WriteBody() {        
     int responseBodySize = getResponseBodySize();
     
     unsigned char buffer[responseBodySize]; 
@@ -27,35 +24,50 @@ int Response::WriteBody() {
     if (bytes_written < 0) {
         throw new ResponseException(FAILED_TO_WRITE_RESPONSE, this->responseType);
     }
-    
+
     return bytes_written;
 }
 
 int Response::ReadBody(){
-    
-    int packetBodyByteSize = this->header->getResponseBodySize();
+        std::cout << "WTF body" << std::endl;
 
-    unsigned char* buffer = new unsigned char[packetBodyByteSize]; 
+    int responseBodySize = this->header->getResponseBodySize();
+
+    unsigned char tmp_buffer[responseBodySize];
+    unsigned char* buffer = new unsigned char[responseBodySize]; 
 
     int bytesRead;
     int totalBytesRead = 0;
-    while ( (bytesRead = read(fd, buffer, packetBodyByteSize) ) > 0 && totalBytesRead < packetBodyByteSize ) {
-        buffer = (unsigned char *) (buffer + bytesRead);
-        totalBytesRead += bytesRead;
-    }
-   
-    
-    delete buffer;
+            std::cout << "WTF OK" << std::endl;
 
-    if (bytesRead < 0) 
+    while (totalBytesRead < responseBodySize && (bytesRead = read(fd, tmp_buffer, responseBodySize) ) > 0) {
+            std::cout << "WTF OK please" << totalBytesRead  << " "<< bytesRead<< std::endl;
+
+        for (int i =0; i< bytesRead ;i++){
+            buffer[totalBytesRead + i] = tmp_buffer[i];
+        }
+        totalBytesRead += bytesRead;
+
+    }
+        std::cout << "WTF OK please at the end" << totalBytesRead  << " "<< bytesRead<< std::endl;
+
+
+
+    if (bytesRead < 0) {
         throw new ResponseException(FAILED_TO_READ_RESPONSE, this->responseType);
+        delete [] buffer;
+    }
 
     deserializeResponseBody(buffer);
+    std::cout << "WTF OK please atSDF " << std::endl; 
+
+    delete [] buffer;
 
     return totalBytesRead;
 }
 
 int Response::WriteHeader() {
+
     delete this->header;
 
     this->header = new ResponseHeader(this->getResponseBodySize(), this->responseType, this->status);
@@ -74,6 +86,7 @@ int Response::WriteHeader() {
 }
 
 int Response::ReadHeader() {
+
     delete this->header;
 
     this->header = new ResponseHeader();
@@ -85,6 +98,8 @@ int Response::ReadHeader() {
         throw new ResponseException(FAILED_TO_READ_RESPONSE_HEADER, this->responseType);
     }
     header->deserializeResponseHeader(buffer);
+    
+            std::cout << "FILENUM?: frepposne the end" << header->getResponseBodySize() << std::endl;
 
     return bytes_read;
 }

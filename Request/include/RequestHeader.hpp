@@ -18,7 +18,7 @@ namespace request {
             this->requestType = RequestType::HEADER;
         }
 
-        ~RequestHeader();
+        ~RequestHeader(){};
 
         int getRequestHeaderSize();
 

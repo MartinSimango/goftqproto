@@ -9,6 +9,7 @@ namespace fts {
     static const char * SERVER_FAILED_TO_START_LISTENING = "Server failed to start listening!";
     static const char * SERVER_NOT_RUNNING = "The server is not running!";
     static const char * FAILED_TO_CLOSE_SERVER_SOCKET = "Failed to close the server socket.";
+    static const char * FAILED_TO_CLOSE_CLIENT_SOCKET = "Failed to close the server socket.";
     static const char * FAILED_TO_ACCEPT_CONNECTION = "Failed accept connection.";
 
 

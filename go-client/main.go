@@ -11,42 +11,40 @@ func main() {
 
 	fmt.Println("[Client...] " + "Starting client...")
 
-	fc := client.NewFileClient(client.WRITE, "/home/martin/tlpl.txt", "../Testers/File.txt")
-	cerr := fc.Connect("192.168.1.106", 3000, true)
+	fc := client.NewFileClient()
+	//cerr := fc.Connect("192.168.1.106", 3000)
 	// fc := client.NewFileClient(client.WRITE, "/Users/martinsimango/tlpl.txt", "../Testers/File.txt")
-	// cerr := fc.Connect("127.0.0.1", 3000, true)
+	cerr := fc.Connect("127.0.0.1", 3000)
 
 	if cerr != nil {
 		fmt.Println(cerr.Error())
 		os.Exit(1)
 	}
+	fi, err := os.Stat("/Users/martinsimango/filecopier/Testers/File.txt")
+	if err != nil {
+		os.Exit(1)
+	}
+	// get the size
+	var size int = int(fi.Size())
+	fmt.Println("File size is ", size)
 
 	fmt.Println("[Client...] " + "Processing...")
 
-	fileSize, cerr := fc.GetFileSize()
+	// files := []string{"/Users/martinsimango/filecopier/Testers/File_2.txt"}
+	// fileSize := []int{30}
 
-	fmt.Println("FILE size: ", fileSize)
+	// fmt.Println(len(("/Users/martinsimango/filecopier/Testers/File_2.txt")))
 
-	if cerr != nil {
-		fmt.Println(cerr.Error())
-		os.Exit(1)
-	}
+	// // cerr = fc.SendCreateRequest(files, fileSize)
 
-	bytes, cerr := fc.Process(0, fileSize)
-
-	if cerr != nil {
-		fmt.Println(cerr.Error())
-		os.Exit(1)
-	}
-	fmt.Println(bytes)
-
-	//cerr := fc.Connect("192.168.1.106", 3000, true)
-
-	if cerr != nil {
-		fmt.Println(cerr.Error())
-		os.Exit(1)
-	}
+	// // if cerr != nil {
+	// // 	fmt.Println(cerr.Error())
+	// // 	os.Exit(1)
+	// // }
 
 	fmt.Println("[Client...] " + "Program Done!!!")
+	for {
+
+	}
 
 }

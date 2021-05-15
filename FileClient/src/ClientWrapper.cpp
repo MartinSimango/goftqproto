@@ -2,6 +2,7 @@
 #include <ClientWrapper.h>
 #include <Client.hpp>
 #include <ErrorVoid.hpp>
+#include <iostream>
 
 using namespace ftc;
 
@@ -28,11 +29,20 @@ void * Connect(void* fc, char * serverAddress, int port) {
     
     Error<void, FileClient,ServerPort> * error = new Error<void, FileClient, ServerPort>(&FileClient::Connect, AsFileClient(fc));
     error->Execute(serverPort);
-
     return dynamic_cast<ErrorBase*>(error);
 }
 
-void * SendCreateRequest(void* fc, char ** filename, int * filesize, int numFiles){
+void * SendCreateRequest(void* fc, char * filenames[], int fileSizes[], int numFiles){
+    std::vector<request::File> * files = new std::vector<request::File>(numFiles);
+    for(int i=0; i< numFiles; i++){
+        files->at(i).setFileName(filenames[i]);
+        files->at(i).fileSize = fileSizes[i];
+    }
+
+    Error<CreateResponse, FileClient, std::vector<request::File>* > * error = new Error<CreateResponse, FileClient, std::vector<request::File>*>(&FileClient::SendCreateRequest, AsFileClient(fc));
+    error->Execute(files);
+
+    return dynamic_cast<ErrorBase*>(error);
 
 }
 
@@ -62,7 +72,7 @@ void * SendWriteRequest(void* fc, int numberOfBytesToWrite, int offset, char *re
 void * CloseFileClient(void* fc){
     Error<void, FileClient> * error = new Error<void, FileClient>(&FileClient::Close, AsFileClient(fc)); 
     error->Execute();
-    
+
     return dynamic_cast<ErrorBase*>(error);
 }
 

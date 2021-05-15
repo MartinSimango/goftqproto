@@ -16,9 +16,9 @@ namespace response {
         ResponseHeader(int requestBodySize, ResponseType::Type responseType, ResponseStatus::Type status): requestBodySize(requestBodySize), 
                     responseType(responseType), status(status) {}
 
-        ResponseHeader() {}
+        ResponseHeader(){}
 
-        ~ResponseHeader();
+        ~ResponseHeader(){};
 
         int getResponseHeaderSize(){
             return sizeof(requestBodySize) + sizeof(responseType) + sizeof(status);

@@ -14,6 +14,7 @@
 #include <string>
 #include <ServerException.hpp>
 #include <Responses.hpp>
+#include <sys/ioctl.h>
 
 using namespace request;
 using namespace response;
@@ -54,19 +55,21 @@ namespace fts {
             inline void createAndBindServerSocket() {
                 if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) 
                     throw new ServerException(FAILED_TO_CREATE_SERVER_SOCKET);
-
+                ioctl(sockfd, FIONBIO, 0);
                 bindServerSocketAddress();
             }    
 
             void handleRequest(CreateRequest* request) {
-
                 //todo test code when this variable is not a pointer
                 std::vector<request::File> * filesCreated = new std::vector<request::File>();
                  // create all the files client has requested to make
                 for (int i=0; i< request->numFiles; i++) {
-                    request::File file = request->files->at(i);
+                    request::File file;
                     try {
-                        sprintf(file.filename, "%s%s",this->rootFolder, request->files->at(i));
+
+                        sprintf(file.filename, "%s%s",this->rootFolder, request->files->at(i).filename);
+
+                        file.fileSize = request->files->at(i).fileSize;
 
                         ResponseStatus::Type status = FileReadWriter::CheckFile(file.filename, Mode::WRITE);
                         if (status == ResponseStatus::OK) {
@@ -86,9 +89,6 @@ namespace fts {
                 }
                 CreateResponse response(connfd, filesCreated);
                 response.Write();
-
-                delete filesCreated;
-                filesCreated = NULL;
             }
 
             void handleRequest(GetRequest *request) {
@@ -154,17 +154,9 @@ namespace fts {
 
         void Accept();
 
-        Response * HandleClientRequest();
+        bool HandleClientRequest();
 
-        CreateResponse SendCreateRequest(std::vector<request::File> * files);
-
-        GetResponse SendGetRequest(char * filepath);
-
-        ReadResponse SendReadRequest(int numberOfBytesToRead, int offset, char *readFile, char * writeFile);
-
-        WriteResponse SendWriteRequest(int numberOfBytesToWrite, int offset, char *readFile, char * writeFile);
-
-        int GetFileSize();
+        bool IsServerRunning();
 
         void Close();
 

@@ -1,6 +1,8 @@
 CC=gcc
 CPP=g++
-IDIR=include ../Error/include ../FilePacket/include ../FileReadWriter/include
+define IDIR
+./include ../Error/include ../Request/include ../Response/include ../FileReadWriter/include ../Serializer/include
+endef
 ODIR=obj
 LDIR=lib
 SDIR=src
@@ -14,7 +16,9 @@ SERVER_OBJECTS=$(patsubst $(SDIR)/%.cpp, $(ODIR)/%.o, $(SERVER_SOURCES))
 
 SERVER_DEPS = $(patsubst %, %/*, $(IDIR)) 
 
-SERVER_DLIB_SOURCES= $(SERVER_SOURCES) ../FilePacket/src/*.cpp ../FileReadWriter/src/*.cpp
+define SERVER_DLIB_SOURCES
+$(SERVER_SOURCES) ../Request/src/*.cpp ../Response/src/*.cpp ../FileReadWriter/src/*.cpp ../Error/src/*.cpp
+endef
 
 build: build-dir $(SERVER_OBJECTS) build-lib install
 

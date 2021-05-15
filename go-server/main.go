@@ -22,16 +22,22 @@ func main() {
 
 	fmt.Println("[Server...] " + "Server started...")
 
-	accepted, cerr := fs.Accept()
+	cerr = fs.Accept()
 
 	if cerr != nil {
 		fmt.Println(cerr.Error())
 		os.Exit(1)
 	}
+	fmt.Println("Handling requests")
 
-	if !accepted { //TODO throw exception if accepted=false?
-		fmt.Println("Could not accept!")
-		os.Exit(1)
+	requestOk := true
+	for requestOk {
+		requestOk, cerr = fs.HandleClientRequest()
+
+		if cerr != nil {
+			fmt.Println(cerr.Error())
+			break
+		}
 	}
 
 	fmt.Println("[Server...] " + "Closing server")
@@ -43,5 +49,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("[Server...] " + "Program succeeded")
+	fmt.Println("[Server...] " + "Server closed")
 }

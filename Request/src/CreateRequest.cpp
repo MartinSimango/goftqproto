@@ -7,12 +7,12 @@ int CreateRequest::getRequestBodySize() const {
     for (int i = 0; i < numFiles; i++) {
         fileSize += files->at(i).getSize();
     }
-    return fileSize;
+    return fileSize + sizeof(numFiles);
 }
 
 void CreateRequest::deserializeRequestBody(unsigned char *buffer){
     
-    deserialize_int_big_endian(buffer, &numFiles);
+    buffer = deserialize_int_big_endian(buffer, &numFiles);
     delete this->files;
     files = new std::vector<request::File>(numFiles);
     for (int i = 0; i < numFiles; i++) {
@@ -22,7 +22,7 @@ void CreateRequest::deserializeRequestBody(unsigned char *buffer){
 
 unsigned char * CreateRequest::serializeRequestBody(unsigned char *buffer){
         
-    serialize_int_big_endian(buffer, numFiles);
+    buffer = serialize_int_big_endian(buffer, numFiles);
 
     for (int i = 0; i < numFiles; i++) {
         buffer = files->at(i).serializeRequestFile(buffer);

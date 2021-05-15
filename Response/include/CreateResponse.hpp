@@ -12,13 +12,11 @@ namespace response {
 
 
     class CreateResponse : public Response
-    {
-
-    private:
-        std::vector<request::File> * files;
-        int numFiles;
+    {    
 
     public:
+        std::vector<request::File> * files;
+        int numFiles;
 
         CreateResponse(int fd, std::vector<request::File> * files, ResponseStatus::Type status = ResponseStatus::OK): Response(fd), files(files) {
             this->responseType = ResponseType::CREATE;
@@ -28,6 +26,7 @@ namespace response {
 
         CreateResponse(int fd): Response(fd) {
             this->responseType = ResponseType::CREATE;
+            this->files = NULL;
         }
 
 

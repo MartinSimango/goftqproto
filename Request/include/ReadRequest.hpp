@@ -29,7 +29,7 @@ namespace request {
             this->header = requestHeader;
         }
 
-        ~ReadRequest();
+        ~ReadRequest(){}
 
         int getRequestBodySize() const override;
 

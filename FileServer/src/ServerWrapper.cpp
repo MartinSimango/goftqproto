@@ -24,17 +24,23 @@ void* StartServer(void* fs, int connections){
 }
 
 void* Accept(void* fs){
-    Error<bool, FileServer> * error = new Error<bool, FileServer>(&FileServer::Accept, AsFileServer(fs));
+    Error<void, FileServer> * error = new Error<void, FileServer>(&FileServer::Accept, AsFileServer(fs));
     error->Execute();
     return dynamic_cast<ErrorBase*>(error);
 }
 
-
-void * GetFileServerFileSize(void *fs) {
-    Error<int, FileServer> * error = new Error<int, FileServer>(&FileServer::GetFileSize, AsFileServer(fs));
+void* HandleClientRequest(void * fs) {
+    Error<bool, FileServer> * error = new Error<bool, FileServer>(&FileServer::HandleClientRequest, AsFileServer(fs));
     error->Execute();
     return dynamic_cast<ErrorBase*>(error);
 }
+
+void * IsServerRunning(void * fs) {
+    Error<bool, FileServer> * error = new Error<bool, FileServer>(&FileServer::IsServerRunning, AsFileServer(fs));
+    error->Execute();
+    return dynamic_cast<ErrorBase*>(error);
+}
+
 
 
 void* CloseFileServer(void* fs){

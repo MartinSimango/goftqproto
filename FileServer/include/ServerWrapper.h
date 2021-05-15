@@ -16,7 +16,9 @@ void* StartServer(void* fs, int connections);
 
 void* Accept(void* fs);
 
-void * GetFileServerFileSize(void *fs);
+void* HandleClientRequest(void * fs);
+
+void * IsServerRunning(void * fs);
 
 void* CloseFileServer(void* fs);
 

@@ -13,15 +13,14 @@ void FileClient::Connect(struct ServerPort serverPort) {
 }
 
 
-
 GetResponse FileClient::SendGetRequest(char * filepath){
     if (!isConnected)
         throw new ClientException(CLIENT_NOT_CONNECTED);
 
-    GetRequest request(sockfd, filepath);
+    GetRequest req(sockfd, filepath);
     GetResponse response(sockfd);
 
-    request.Write();
+    req.Write();
     return response;
 }
 
@@ -34,6 +33,8 @@ CreateResponse FileClient::SendCreateRequest(std::vector<request::File> * files)
 
     request.Write();
     response.Read();
+
+    std::cout << "FILENUM?: frepposne" << response.numFiles << std::endl;
 
     //todo rather call Read within the response constructor in order to not expose the read method one the response is returned
     return response;

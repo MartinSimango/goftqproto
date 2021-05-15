@@ -33,7 +33,7 @@ namespace request {
             this->header = requestHeader;
         }
 
-        ~WriteRequest();
+        ~WriteRequest(){}
 
         int getRequestBodySize() const override;
 

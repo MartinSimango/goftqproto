@@ -21,7 +21,7 @@ namespace response {
             this->status = status;
         }
 
-        ~GetResponse();
+        ~GetResponse(){};
         
         int getResponseBodySize() const override;
 

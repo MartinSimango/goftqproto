@@ -2,7 +2,8 @@
 #include <iostream>
 #include <exception>
 
-namespace error {
+namespace error
+ {
 
     class Exception : public std::exception {
         

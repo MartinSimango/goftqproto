@@ -7,25 +7,23 @@ int CreateResponse::getResponseBodySize() const {
     for (int i = 0; i < numFiles; i++) {
         fileSize += files->at(i).getSize();
     }
-    return fileSize;
+    return fileSize + sizeof(numFiles);
 }
 
 void CreateResponse::deserializeResponseBody(unsigned char *buffer){
     
-    header->deserializeResponseHeader(buffer);
-
-    deserialize_int_big_endian(buffer, &numFiles);
-
+    buffer = deserialize_int_big_endian(buffer, &numFiles);
+    delete this->files;
+    files = new std::vector<request::File>(numFiles);
+    
     for (int i = 0; i < numFiles; i++) {
         files->at(i).deserializeRequestFile(buffer);
     }
 }
 
 unsigned char * CreateResponse::serializeResponseBody(unsigned char *buffer){
-    
-    header->serializeResponseHeader(buffer);
-    
-    serialize_int_big_endian(buffer, numFiles);
+        
+    buffer = serialize_int_big_endian(buffer, numFiles);
 
     for (int i = 0; i < numFiles; i++) {
         buffer = files->at(i).serializeRequestFile(buffer);

@@ -26,6 +26,7 @@ namespace response {
         Response(int fd): fd(fd) { 
             responseType = ResponseType::UNKNOWN;
             status = ResponseStatus::OK;
+            this->header = NULL;
         } 
 
         Response(int fd, ResponseStatus::Type status): fd(fd), status(status) { 
