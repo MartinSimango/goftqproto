@@ -13,8 +13,9 @@ namespace response {
 
     public:
 
-        WriteResponse(int fd, int numberOfBytesWritten): Response(fd), numberOfBytesWritten(numberOfBytesWritten) {
-            responseType = ResponseType::WRITE;
+        WriteResponse(int fd, int numberOfBytesWritten, ResponseStatus::Type status = ResponseStatus::OK): Response(fd), numberOfBytesWritten(numberOfBytesWritten) {
+            this->responseType = ResponseType::WRITE;
+            this->status = status;
         }
 
         WriteResponse(int fd): Response(fd) {
@@ -26,9 +27,12 @@ namespace response {
 
         int getResponseBodySize() const override;
 
-        void deserializeResponse(unsigned char *buffer) override;
+        void deserializeResponseBody(unsigned char *buffer) override;
 
-        unsigned char * serializeResponse(unsigned char *buffer) override;
+        unsigned char * serializeResponseBody(unsigned char *buffer) override;
+
+        std::string GetBody() const override;
+
 
     };
 

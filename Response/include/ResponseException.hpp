@@ -5,7 +5,11 @@
 #include <errno.h>
 
 static const char * FAILED_TO_WRITE_RESPONSE = "Failed to write response.";
-static const char * FAILED_TO_READ_FROM_RESPONSE = "Failed to read from response.";
+static const char * FAILED_TO_READ_RESPONSE = "Failed to read response.";
+
+static const char * FAILED_TO_WRITE_RESPONSE_HEADER = "Failed to write response header";
+static const char * FAILED_TO_READ_RESPONSE_HEADER = "Failed to read response header.";
+
 
 
 namespace response {
@@ -30,6 +34,8 @@ namespace response {
             const char * getRequestTypeName() const {
                 switch (responseType)
                 {
+                case ResponseType::HEADER:
+                    return "Request Header";
                 case ResponseType::CREATE:
                     return "CREATE Response";
                 case ResponseType::GET:

@@ -2,18 +2,27 @@
 
 using namespace response;
 
-int Response::WriteResponse() {
-            
-    int packetBodyByteSize = getResponseBodySize();
+int Response::Write() {
+    WriteHeader();
+    WriteBody();
+}
 
-    header = new ResponseHeader(packetBodyByteSize, this->responseType, this->header->getStatus());
+int Response::Read() {
+    ReadHeader();
+    ReadBody();
+}
+
+int Response::WriteBody() {
+            
+        
+    int responseBodySize = getResponseBodySize();
     
-    unsigned char buffer[packetBodyByteSize + header->getResponseHeaderSize()]; 
+    unsigned char buffer[responseBodySize]; 
     unsigned char *ptr; 
 
-    ptr = serializeResponse(buffer);
+    ptr = serializeResponseBody(buffer);
 
-    int bytes_written = write(fd, buffer, ptr - buffer);   
+    int bytes_written = write(fd, buffer, ptr - buffer);   //todo loop write to ensure all bytes are written
 
     if (bytes_written < 0) {
         throw new ResponseException(FAILED_TO_WRITE_RESPONSE, this->responseType);
@@ -22,14 +31,9 @@ int Response::WriteResponse() {
     return bytes_written;
 }
 
-int Response::ReadResponse(){
-
-    //read in the header
-    header = new ResponseHeader();
-    unsigned char headerBuffer[header->getResponseHeaderSize()];
-    header->deserializeResponseHeader(headerBuffer);
-
-    int packetBodyByteSize = header->getResponseBodySize();
+int Response::ReadBody(){
+    
+    int packetBodyByteSize = this->header->getResponseBodySize();
 
     unsigned char* buffer = new unsigned char[packetBodyByteSize]; 
 
@@ -44,11 +48,46 @@ int Response::ReadResponse(){
     delete buffer;
 
     if (bytesRead < 0) 
-        throw new ResponseException(FAILED_TO_READ_FROM_RESPONSE, this->responseType);
+        throw new ResponseException(FAILED_TO_READ_RESPONSE, this->responseType);
 
-    deserializeResponse(buffer);
+    deserializeResponseBody(buffer);
 
     return totalBytesRead;
 }
+
+int Response::WriteHeader() {
+    delete this->header;
+
+    this->header = new ResponseHeader(this->getResponseBodySize(), this->responseType, this->status);
+    unsigned char buffer[this->header->getResponseHeaderSize()]; 
+    unsigned char *ptr; 
+
+    ptr = this->header->serializeResponseHeader(buffer);
+
+    int bytes_written = write(fd, buffer, ptr - buffer); 
+
+    if (bytes_written < 0) {
+        throw new ResponseException(FAILED_TO_WRITE_RESPONSE_HEADER, this->responseType);
+    }
+
+    return bytes_written;
+}
+
+int Response::ReadHeader() {
+    delete this->header;
+
+    this->header = new ResponseHeader();
+    unsigned char buffer[header->getResponseHeaderSize()];
+
+    int bytes_read = read(fd, buffer, header->getResponseHeaderSize()); //todo use while to ensure all data is read
+
+    if (bytes_read < 0) { 
+        throw new ResponseException(FAILED_TO_READ_RESPONSE_HEADER, this->responseType);
+    }
+    header->deserializeResponseHeader(buffer);
+
+    return bytes_read;
+}
+
 
 

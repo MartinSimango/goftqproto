@@ -10,7 +10,7 @@ int CreateResponse::getResponseBodySize() const {
     return fileSize;
 }
 
-void CreateResponse::deserializeResponse(unsigned char *buffer){
+void CreateResponse::deserializeResponseBody(unsigned char *buffer){
     
     header->deserializeResponseHeader(buffer);
 
@@ -21,7 +21,7 @@ void CreateResponse::deserializeResponse(unsigned char *buffer){
     }
 }
 
-unsigned char * CreateResponse::serializeResponse(unsigned char *buffer){
+unsigned char * CreateResponse::serializeResponseBody(unsigned char *buffer){
     
     header->serializeResponseHeader(buffer);
     
@@ -31,4 +31,8 @@ unsigned char * CreateResponse::serializeResponse(unsigned char *buffer){
         buffer = files->at(i).serializeRequestFile(buffer);
     }
     return buffer; 
+}
+
+std::string CreateResponse::GetBody() const {
+    return "{ }";
 }

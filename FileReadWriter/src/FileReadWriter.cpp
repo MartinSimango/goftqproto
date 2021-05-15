@@ -1,6 +1,7 @@
-#include <PacketConstants.h>
 #include <FileReadWriter.hpp>
 #include <stdio.h>
+
+using namespace frw;
 
 void FileReadWriter::Open(){
     if(opened){
@@ -56,7 +57,7 @@ int FileReadWriter::GetFileDescriptor() const {
 }
 
 
-unsigned char FileReadWriter::CheckFile(const char * filename, Mode::Type mode) {
+ResponseStatus::Type FileReadWriter::CheckFile(const char * filename, Mode::Type mode) {
       return (mode == Mode::READ) ? checkFileForRead(filename)
                             : checkFileForWrite(filename);
 }

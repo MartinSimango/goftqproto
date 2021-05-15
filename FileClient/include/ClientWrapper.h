@@ -1,24 +1,32 @@
 
 #pragma once
 #include <stdbool.h>
-#include <PacketConstants.h>
+
+#define READ_MODE 0
+#define WRITE_MODE 1
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 
-void* NewFileClient(int mode, char * requestFileName, char * filename);
+void* NewFileClient();
 
 void DestroyFileClient(void* fc);
 
 // Connect connects the client to the specific server specified by the ServerPort 
-void * Connect(void* fc,char * serverAddress, int port, bool create);
-// Process either reads or writes to the server depending on what mode the FileClient is in
-// returns the number of bits written or read to the server depending on the mode
-void * Process(void* fc,int offset, int numberOfBytesRead);
+void * Connect(void* fc,char * serverAddress, int port);
 
-void * GetFileClientFileSize(void *fc);
+void * SendCreateRequest(void* fc, char ** filename, int * filesize, int numFiles);
+
+void * SendGetRequest(void* fc, char * filepath);
+
+void * SendReadRequest(void* fc, int numberOfBytesToRead, int offset, char *readFile, char * writeFile);
+
+void * SendWriteRequest(void* fc, int numberOfBytesToWrite, int offset, char *readFile, char * writeFile);
+
+// Close closes the connection to the server, returns false upon failure
+void Close();
 
 // CloseFileClient closes the connection to the server, returns false upon failure
 void * CloseFileClient(void* fc);

@@ -7,13 +7,17 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include <Packets.hpp>
+#include <RequestHeader.hpp>
+#include <Requests.hpp>
 #include <FileReadWriter.hpp>
 #include <sys/stat.h>
 #include <string>
 #include <ServerException.hpp>
+#include <Responses.hpp>
 
 using namespace request;
+using namespace response;
+using namespace frw;
 
 //TODO find duplicated methods in Server and Client and make that method in shared class
 namespace fts {
@@ -23,16 +27,6 @@ namespace fts {
         int port;
     };
 
-    struct ClientRequest {
-        bool create;
-        unsigned char status;
-
-        ClientRequest(bool create, unsigned char status) {
-            this->create = create;
-            this->status = status;
-        }
-    };
-
     // TODO if error occurs sent request back to client
 
     class FileServer {
@@ -40,7 +34,7 @@ namespace fts {
         private:
 
             FileReadWriter *frw;
-            int sockfd, connfd, port, fileSize;
+            int sockfd, connfd, port;
             Mode::Type mode;
             bool isRunning;
             char filepath[MAX_FILEPATH_LENGTH], rootFolder[20]; // TODO make 20 constant
@@ -62,77 +56,91 @@ namespace fts {
                     throw new ServerException(FAILED_TO_CREATE_SERVER_SOCKET);
 
                 bindServerSocketAddress();
-            }
+            }    
 
-            // writeToClient reads from the file request by the client and writes
-            inline void writeToClient() {
-                FileConfigPacket fileConfigPacket(connfd);
-                char buffer[fileConfigPacket.numberOfBytesToRead];
-                int bytesRead = readFromFile(buffer, &fileConfigPacket);
+            void handleRequest(CreateRequest* request) {
 
-                FilePacket filePacket(connfd, buffer, bytesRead, fileConfigPacket.offset);
-                filePacket.WriteRequest();
-            }
-            
-            inline void readFromClient() {
-                FilePacket request(connfd);
-                request.ReadRequest();
-                writeToFile(request.data, request.numberOfBytesRead, request.offset);
-                //write(connfd, 1,)
-            }
+                //todo test code when this variable is not a pointer
+                std::vector<request::File> * filesCreated = new std::vector<request::File>();
+                 // create all the files client has requested to make
+                for (int i=0; i< request->numFiles; i++) {
+                    request::File file = request->files->at(i);
+                    try {
+                        sprintf(file.filename, "%s%s",this->rootFolder, request->files->at(i));
 
-            inline int readFromFile(char * buffer, FileConfigPacket * fileConfigPacket) {
-                return frw->ReadFromFile(buffer, fileConfigPacket->numberOfBytesToRead, fileConfigPacket->offset);
-            }
-            inline int writeToFile(char *buffer, int bytesToWrite, int offset) {
-                return frw->WriteToFile(buffer, bytesToWrite, offset); 
-            }
-        
-            // openFile opens the file for reading or writing
-            inline void openFile(bool create = false) {
-                frw = new FileReadWriter(filepath, mode, fileSize);
-                frw->Open(create);
-            }
-
-            //handleClientRequest reads the clients request
-            inline ClientRequest handleClientRequest(){
-                
-                RequestPacket requestPacket(connfd);
-                requestPacket.ReadRequest();
-
-                this->mode = requestPacket.mode;
-
-                // TODO convert c type strings to c++
-                sprintf(this->filepath, "%s%s",this->rootFolder, requestPacket.filepath);
-
-                ResponsePacket responsePacket(connfd);
-                    
-
-                responsePacket.status = FileReadWriter::CheckFile(requestPacket.filepath, requestPacket.mode);
-                if (responsePacket.status == OK ) {
-
-                    if (mode == WRITE) {
-                        this->fileSize = requestPacket.fileSize;
+                        ResponseStatus::Type status = FileReadWriter::CheckFile(file.filename, Mode::WRITE);
+                        if (status == ResponseStatus::OK) {
+                            FileReadWriter::CreateFile(file.filename, file.fileSize); 
+                            filesCreated->push_back(file);
+                        }
+                        else {
+                            throw new FRWException(FAILED_TO_CREATE_FILE, file.filename);
+                        }
                     }
-                    else if (mode == READ) {
-                        responsePacket.fileSize = FileReadWriter::GetFileSize(requestPacket.filepath);
+                    catch(FRWException * e) {
+                        //todo log exceptions (proper logging)
+                        char message[100];
+                        std::cerr << "[Server...]" << e->getErrorMessage(message) << std::endl;
+                        delete e;
                     }
                 }
-                
-                responsePacket.WriteRequest();
-                struct ClientRequest clientRequest(requestPacket.createFile, responsePacket.status);
+                CreateResponse response(connfd, filesCreated);
+                response.Write();
 
-                return clientRequest;
+                delete filesCreated;
+                filesCreated = NULL;
+            }
+
+            void handleRequest(GetRequest *request) {
+                // todo: to implement
+            }
+
+            void handleRequest(ReadRequest *request){
+                char filepath[MAX_FILEPATH_LENGTH];
+                sprintf(filepath, "%s%s",this->rootFolder, request->filename);
+
+                FileReadWriter frw(filepath, Mode::READ);
+                int numberOfBytesToRead = request->numberOfBytesToRead;
+                int offset = request->offset;
+                char buffer[numberOfBytesToRead];
+
+                ResponseStatus::Type status = FileReadWriter::CheckFile(filepath, Mode::READ);
+                int bytesRead = 0;
+                if (status == ResponseStatus::OK) {
+                    frw.Open();
+                    bytesRead = frw.ReadFromFile(buffer, numberOfBytesToRead, offset);
+                    frw.Close();
+                }
+
+                ReadResponse response(connfd, bytesRead, buffer);
+                response.Write();
+            }
+
+            void handleRequest(WriteRequest *request){
+                char filepath[MAX_FILEPATH_LENGTH];
+                sprintf(filepath, "%s%s",this->rootFolder, request->filepath);
+                
+                FileReadWriter frw(filepath, Mode::WRITE);
+                int numberOfBytesToWrite = request->numberOfBytesToWrite;
+                int offset = request->offset;
+                
+                int bytesWritten = 0;
+                ResponseStatus::Type status = FileReadWriter::CheckFile(filepath, Mode::WRITE);
+                if (status == ResponseStatus::OK) {
+                    frw.Open();
+                    bytesWritten = frw.WriteToFile(request->data, numberOfBytesToWrite, offset); 
+                    frw.Close();
+                }            
+
+                WriteResponse response(connfd, bytesWritten, status);
+                response.Write();
+
             }
             
-            inline void process(){
-                mode == WRITE ? readFromClient(): writeToClient();
-            }
-
         public:
 
         // ServerPort represent the server the 
-        FileServer(int port, const char * rootFolder = ""): port(port), fileSize(-1){ 
+        FileServer(int port, const char * rootFolder = ""): port(port) { 
             strncpy(this->rootFolder, rootFolder, sizeof(this->rootFolder));
         }
 
@@ -144,7 +152,17 @@ namespace fts {
         // StartServer
         void StartServer(int connections);
 
-        bool Accept();
+        void Accept();
+
+        Response * HandleClientRequest();
+
+        CreateResponse SendCreateRequest(std::vector<request::File> * files);
+
+        GetResponse SendGetRequest(char * filepath);
+
+        ReadResponse SendReadRequest(int numberOfBytesToRead, int offset, char *readFile, char * writeFile);
+
+        WriteResponse SendWriteRequest(int numberOfBytesToWrite, int offset, char *readFile, char * writeFile);
 
         int GetFileSize();
 

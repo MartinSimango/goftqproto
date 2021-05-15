@@ -5,7 +5,10 @@
 #include <errno.h>
 
 static const char * FAILED_TO_WRITE_REQUEST = "Failed to write request.";
-static const char * FAILED_TO_READ_FROM_REQUEST = "Failed to read from request.";
+static const char * FAILED_TO_READ_REQUEST = "Failed to read from request.";
+static const char * FAILED_TO_WRITE_REQUEST_HEADER = "Failed to write request header.";
+static const char * FAILED_TO_READ_REQUEST_HEADER = "Failed to read request header.";
+
 
 namespace request {
 
@@ -29,6 +32,8 @@ namespace request {
             const char * getRequestTypeName() const {
                 switch (requestType)
                 {
+                case RequestType::HEADER:
+                    return "Request Header";
                 case RequestType::CREATE:
                     return "CREATE Request";
                 case RequestType::GET:

@@ -1,7 +1,8 @@
 #include <Client.hpp>
+#include <Requests.hpp>
+#include <Responses.hpp>
 
 using namespace ftc;
-
 
 void FileClient::Connect(struct ServerPort serverPort) {
     if (isConnected)
@@ -13,82 +14,62 @@ void FileClient::Connect(struct ServerPort serverPort) {
 
 
 
-void FileClient::SendGetRequest(char * filepath){
+GetResponse FileClient::SendGetRequest(char * filepath){
     if (!isConnected)
         throw new ClientException(CLIENT_NOT_CONNECTED);
 
     GetRequest request(sockfd, filepath);
-    request.WriteRequest();
+    GetResponse response(sockfd);
+
+    request.Write();
+    return response;
+}
+
+CreateResponse FileClient::SendCreateRequest(std::vector<request::File> * files) {
+    if (!isConnected)
+        throw new ClientException(CLIENT_NOT_CONNECTED);
+
+    CreateRequest request(sockfd, files);
+    CreateResponse response(sockfd);
+
+    request.Write();
+    response.Read();
+
+    //todo rather call Read within the response constructor in order to not expose the read method one the response is returned
+    return response;
+}
+
+ReadResponse FileClient::SendReadRequest(int numberOfBytesToRead, int offset, char *readFile, char * writeFile) {
+    if (!isConnected)
+        throw new ClientException(CLIENT_NOT_CONNECTED);
     
-    //read response from server
+    ReadRequest request(sockfd, readFile, offset, numberOfBytesToRead);
+    ReadResponse response(sockfd);
+
+    request.Write();
+    response.Read();
+
+    FileReadWriter frw(writeFile, Mode::WRITE);
+    frw.Open();
+    frw.WriteToFile(response.data, response.numberOfBytesRead, offset);
+    frw.Close();
+
+    return response;
 }
 
-void FileClient::SendCreateRequest(std::vector<request::File> * files) {
+WriteResponse FileClient::SendWriteRequest(int numberOfBytesToWrite, int offset, char *readFile, char * writeFile) {
     if (!isConnected)
         throw new ClientException(CLIENT_NOT_CONNECTED);
 
-    CreateRequest createRequest(sockfd, files);
-    createRequest.WriteRequest();
-    //read response from server
+    FileReadWriter frw(readFile, Mode::READ);
+    frw.Open();
+    int bytes_written = writeToServer(&frw, writeFile, numberOfBytesToWrite, offset);
+    frw.Close();
 
-}
-void FileClient::SendReadRequest(int numberOfBytesToRead, int offset, char *readFile, char * writeFile) {
-    if (!isConnected)
-        throw new ClientException(CLIENT_NOT_CONNECTED);
-    
-    ReadRequest readRequest(sockfd, readFile, offset, numberOfBytesToRead);
-    readRequest.WriteRequest();
+    WriteResponse response(sockfd);
+    response.Read();
 
-}
-
-void FileClient::SendWriteRequest(int numberOfBytesToWrite, int offset, char *readFile, char * writeFile) {
-    if (!isConnected)
-        throw new ClientException(CLIENT_NOT_CONNECTED);
-    FileReadWriter * frw = new FileReadWriter(readFile, Mode::READ);
-    frw->Open();
-    
-    int bytes_written = writeToServer(frw, writeFile, numberOfBytesToWrite, offset);
-    frw->Close();
-    delete frw;
-
-    //read response from server    
-}
-
-
-void FileClient::ReadResponse(Request * request) {
-    if (!isConnected)
-        throw new ClientException(CLIENT_NOT_CONNECTED);
-    switch (request->GetPacketType())
-    {
-    case ResponseType::CREATE:
-        break;
-    case ResponseType::GET:
-        break;
-    case ResponseType::READ:
-        break;
-    case ResponseType::WRITE:
-        break;
-    
-    default:
-        break;
-    }
-}
-
-
-int FileClient::Process(int offset, int numberOfBytesRead){
-    if (!isConnected)
-        throw new ClientException(CLIENT_NOT_CONNECTED);
-        
-    FileConfigPacket request(sockfd, offset, numberOfBytesRead);
-
-    return (mode == READ) ? readFromServer(&request): writeToServer(&request);
-}
-
-int FileClient::GetFileSize() {
-    if (!isConnected && mode == READ)
-        throw new ClientException(CLIENT_NOT_CONNECTED);
-        
-    return fileSize;
+    return response;
 }
 
 

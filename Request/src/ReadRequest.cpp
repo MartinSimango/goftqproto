@@ -2,11 +2,11 @@
 
 using namespace request;
 
-int ReadRequest::getRequestSize() const {
+int ReadRequest::getRequestBodySize() const {
     return sizeof(offset) + sizeof(numberOfBytesToRead) + strlen(filename) + 1 ; 
 }
 
-void ReadRequest::deserializeRequest(unsigned char *buffer){
+void ReadRequest::deserializeRequestBody(unsigned char *buffer){
     
     header->deserializeRequestHeader(buffer);
 
@@ -15,7 +15,7 @@ void ReadRequest::deserializeRequest(unsigned char *buffer){
     buffer = deserialize_char_array(buffer, filename);
     }
 
-unsigned char * ReadRequest::serializeRequest(unsigned char *buffer){
+unsigned char * ReadRequest::serializeRequestBody(unsigned char *buffer){
     
     buffer = header->serializeRequestHeader(buffer);
     
@@ -24,6 +24,8 @@ unsigned char * ReadRequest::serializeRequest(unsigned char *buffer){
     buffer = serialize_char_array(buffer, filename);
 
     return buffer; 
-    
-  
+}
+
+std::string ReadRequest::GetBody() const {
+    return "{ }";
 }

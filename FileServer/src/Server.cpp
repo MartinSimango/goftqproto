@@ -11,7 +11,7 @@ void FileServer::StartServer(int connections){
     isRunning = true;
 }
 
-bool FileServer::Accept(){
+void FileServer::Accept(){
     if(!isRunning){
         throw new ServerException(SERVER_NOT_RUNNING);
     }
@@ -20,21 +20,14 @@ bool FileServer::Accept(){
     int len = sizeof(client);
     connfd = accept(sockfd, (struct sockaddr*)&client, (socklen_t *) &len);
     
-    while(isRunning) {
-        struct ClientRequest clientRequest = handleClientRequest();
-
+    if (connfd < 0) {
+        throw new ServerException(FAILED_TO_ACCEPT_CONNECTION);
     }
-    if (clientRequest.status != OK) {
-        return false;
-    }
-
-    openFile(clientRequest.create && mode == WRITE); // && mode == WRITE ensures we only create file when writing to a file 
-    process();
-    return true;
+    
 }
 
 int FileServer::GetFileSize() {
-    if (!isRunning && mode == READ)
+    if (!isRunning && mode == Mode::READ)
         throw new ServerException(SERVER_NOT_RUNNING);
 
     return fileSize;
@@ -48,4 +41,30 @@ void FileServer::Close(){
         throw new ServerException(FAILED_TO_CLOSE_SERVER_SOCKET);
     
     isRunning = false;
+}
+
+Response * FileServer::HandleClientRequest() {
+    RequestHeader *header = new RequestHeader(connfd);
+    header->Read();
+    switch (header->requestType) {
+    case RequestType::CREATE:
+        CreateRequest *request = new CreateRequest(connfd, header);
+        handleRequest(request);
+        break;
+    case RequestType::GET:
+        GetRequest *request = new GetRequest(connfd, header);
+        handleRequest(request);
+        break;
+    case RequestType::READ:
+        ReadRequest *request = new ReadRequest(connfd, header);
+        handleRequest(request);
+        break;
+    case RequestType::WRITE:
+        WriteRequest *request = new WriteRequest(connfd, header);
+        handleRequest(request);
+        break;
+    default:
+        break;
+    }
+
 }

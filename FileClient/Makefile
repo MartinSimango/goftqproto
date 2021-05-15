@@ -1,6 +1,6 @@
 CC=gcc
 CPP=g++
-IDIR=include ../Error/include ../FilePacket/include ../FileReadWriter/include
+IDIR=include ../Error/include ../Request/include ../Response/include ../FileReadWriter/include ../Serializer/include
 ODIR=obj
 LDIR=lib
 SDIR=src

@@ -26,17 +26,23 @@ namespace request {
             this->numberOfBytesToWrite = numberOfBytesToWrite;
         }
 
-        WriteRequest(int fd): request::Request(fd) {
+        WriteRequest(int fd, RequestHeader * requestHeader): request::Request(fd) {
             requestType = RequestType::WRITE;
+
+            delete this->header;
+            this->header = requestHeader;
         }
 
         ~WriteRequest();
 
-        int getRequestSize() const override;
+        int getRequestBodySize() const override;
 
-        void deserializeRequest(unsigned char *buffer) override;
+        void deserializeRequestBody(unsigned char *buffer) override;
 
-        unsigned char * serializeRequest(unsigned char *buffer) override;
+        unsigned char * serializeRequestBody(unsigned char *buffer) override;
+
+        std::string GetBody() const override;
+
 
     };
 

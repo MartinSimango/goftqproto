@@ -26,6 +26,8 @@ namespace request {
         unsigned char * serializeRequestFile(unsigned char *buffer) {
             buffer = serialize_char_array(buffer, filename);
             buffer = serialize_int_big_endian(buffer, fileSize);
+
+            return buffer;
         }
 
     };
@@ -33,29 +35,34 @@ namespace request {
     class CreateRequest : public Request
     {
 
-    private:
-        std::vector<request::File> * files;
-        int numFiles;
 
     public:
 
+        std::vector<request::File> * files;
+        int numFiles;
+
         CreateRequest(int fd, std::vector<request::File> * files): request::Request(fd), files(files) {
-            requestType = RequestType::CREATE;
-            numFiles = files->size();
+            this->requestType = RequestType::CREATE;
+            this->numFiles = files->size();
         }
 
-        CreateRequest(int fd): request::Request(fd){
-            requestType = RequestType::CREATE;
+        CreateRequest(int fd, RequestHeader * requestHeader): request::Request(fd){
+            this->requestType = RequestType::CREATE;
+
+            delete this->header;
+            this->header = requestHeader;
         }
 
 
         ~CreateRequest(){}
 
-        int getRequestSize() const override;
+        int getRequestBodySize() const override;
 
-        void deserializeRequest(unsigned char *buffer) override;
+        void deserializeRequestBody(unsigned char *buffer) override;
 
-        unsigned char * serializeRequest(unsigned char *buffer) override;
+        unsigned char * serializeRequestBody(unsigned char *buffer) override;
+
+        std::string GetBody() const override;
 
     };
 

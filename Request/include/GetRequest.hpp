@@ -9,8 +9,11 @@ namespace request {
     private:
         char filepath[MAX_FILEPATH_LENGTH];
     public:
-        GetRequest(int fd): Request(fd) {
+        GetRequest(int fd, RequestHeader * requestHeader): Request(fd) {
             requestType = RequestType::GET;
+
+            delete this->header;
+            this->header = requestHeader;
         }
         GetRequest(int fd, char* filepath): Request(fd) {
             requestType = RequestType::GET;
@@ -19,11 +22,14 @@ namespace request {
 
         ~GetRequest();
         
-        int getRequestSize() const override;
+        int getRequestBodySize() const override;
 
-        void deserializeRequest(unsigned char *buffer) override;
+        void deserializeRequestBody(unsigned char *buffer) override;
 
-        unsigned char * serializeRequest(unsigned char *buffer) override;
+        unsigned char * serializeRequestBody(unsigned char *buffer) override;
+
+        std::string GetBody() const override;
+
 
     };
 

@@ -22,17 +22,23 @@ namespace request {
             this->numberOfBytesToRead = numberOfBytesToRead;
         }
 
-        ReadRequest(int fd): request::Request(fd) {
+        ReadRequest(int fd, RequestHeader * requestHeader): request::Request(fd) {
             requestType = RequestType::READ;
+
+            delete this->header;
+            this->header = requestHeader;
         }
 
         ~ReadRequest();
 
-        int getRequestSize() const override;
+        int getRequestBodySize() const override;
 
-        void deserializeRequest(unsigned char *buffer) override;
+        void deserializeRequestBody(unsigned char *buffer) override;
 
-        unsigned char * serializeRequest(unsigned char *buffer) override;
+        unsigned char * serializeRequestBody(unsigned char *buffer) override;
+        
+        std::string GetBody() const override;
+
 
     };
 

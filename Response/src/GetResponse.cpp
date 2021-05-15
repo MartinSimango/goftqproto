@@ -10,10 +10,8 @@ int GetResponse::getResponseBodySize() const {
     return fileSize;
 }
 
-void GetResponse::deserializeResponse(unsigned char *buffer){
+void GetResponse::deserializeResponseBody(unsigned char *buffer){
     
-    header->deserializeResponseHeader(buffer);
-
     deserialize_int_big_endian(buffer, &numFiles);
 
     for (int i = 0; i < numFiles; i++) {
@@ -21,14 +19,16 @@ void GetResponse::deserializeResponse(unsigned char *buffer){
     }
 }
 
-unsigned char * GetResponse::serializeResponse(unsigned char *buffer){
-    
-    header->serializeResponseHeader(buffer);
-    
+unsigned char * GetResponse::serializeResponseBody(unsigned char *buffer){
+        
     serialize_int_big_endian(buffer, numFiles);
 
     for (int i = 0; i < numFiles; i++) {
         buffer = files->at(i).serializeRequestFile(buffer);
     }
     return buffer; 
+}
+
+std::string GetResponse::GetBody() const {
+    return "{ }";
 }

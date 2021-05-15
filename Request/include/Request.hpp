@@ -14,6 +14,7 @@ namespace request {
         
         private:
         int fd;
+        bool headerRead, headerWritten;
 
         protected: 
         RequestType::Type requestType;  
@@ -21,7 +22,16 @@ namespace request {
 
         public:
 
-        Request(int fd): fd(fd) {  requestType = RequestType::UNKNOWN; } 
+        Request(int fd): fd(fd) { 
+            this->header = NULL;
+            requestType = RequestType::UNKNOWN;
+        }
+
+        Request(int fd, RequestHeader * header): fd(fd) {
+            this->header = header;
+            requestType = RequestType::UNKNOWN;
+        }
+
         virtual ~Request() { 
             delete header;
             header = NULL;
@@ -29,14 +39,27 @@ namespace request {
         
         RequestType::Type GetRequestType() const { return requestType; }
 
-        int WriteRequest();
-        int ReadRequest();
+        RequestHeader* GetRequestHeader() const { return header; }
+
+        int Write();
+
+        int Read();
+
+        int WriteBody();
+
+        int ReadBody();
+
+        int WriteHeader();
+
+        int ReadHeader();
          
-        virtual int getRequestSize() const = 0;
-        virtual void deserializeRequest(unsigned char *buffer) = 0;
-        virtual unsigned char * serializeRequest(unsigned char *buffer) = 0;
-    
-    
+        virtual int getRequestBodySize() const = 0;
+
+        virtual void deserializeRequestBody(unsigned char *buffer) = 0;
+
+        virtual unsigned char * serializeRequestBody(unsigned char *buffer) = 0;
+
+        virtual std::string GetBody() const = 0;    
     };
 };
 

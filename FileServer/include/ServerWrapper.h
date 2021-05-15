@@ -1,7 +1,8 @@
 
 #pragma once
 #include <stdbool.h>
-#include <PacketConstants.h>
+#define READ_MODE 0
+#define WRITE_MODE 1
 
 #ifdef __cplusplus
 extern "C" {

@@ -7,36 +7,28 @@ namespace request {
     {
     private:
         int requestBodySize; 
-        RequestType::Type requestType;
+        int fd;
         
     public:
-    
+        RequestType::Type requestType;
+
         RequestHeader(int requestBodySize, RequestType::Type requestType): requestBodySize(requestBodySize), requestType(requestType){}
 
-        RequestHeader() {}
+        RequestHeader(int fd): fd(fd) {
+            this->requestType = RequestType::HEADER;
+        }
 
         ~RequestHeader();
 
-        int getRequestHeaderSize(){
-            return sizeof(requestBodySize) + sizeof(requestType);
-        }
+        int getRequestHeaderSize();
 
-        unsigned char * serializeRequestHeader(unsigned char *buffer) {
-            buffer = serialize_int_big_endian(buffer, requestBodySize);
-            buffer = serialize_int_big_endian(buffer, requestType);
-            return buffer;
-        }
+        unsigned char * serializeRequestHeader(unsigned char *buffer);
 
-        void deserializeRequestHeader(unsigned char *buffer) {
-            buffer = deserialize_int_big_endian(buffer, &requestBodySize);
-            buffer = deserialize_int_big_endian(buffer, (int*)&requestType); 
+        void deserializeRequestHeader(unsigned char *buffer);
 
-        }
+        int getRequestBodySize() const;
 
-        int getRequestBodySize() const {
-            return requestBodySize;
-        }
-
+        int Read();
 
     };
 

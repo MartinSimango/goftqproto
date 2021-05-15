@@ -15,18 +15,21 @@ namespace response {
             responseType = ResponseType::GET;
         }
 
-        GetResponse(int fd, std::vector<request::File> * files): Response(fd), files(files) {
+        GetResponse(int fd, std::vector<request::File> * files, ResponseStatus::Type status = ResponseStatus::OK): Response(fd), files(files) {
             responseType = ResponseType::GET;
             this->numFiles = files->size();
+            this->status = status;
         }
 
         ~GetResponse();
         
         int getResponseBodySize() const override;
 
-        void deserializeResponse(unsigned char *buffer) override;
+        void deserializeResponseBody(unsigned char *buffer) override;
 
-        unsigned char * serializeResponse(unsigned char *buffer) override;
+        unsigned char * serializeResponseBody(unsigned char *buffer) override;
+
+        std::string GetBody() const override;
 
     };
 

@@ -1,7 +1,9 @@
-SUBDIRS=Error FileClient FileReadWriter FileServer Request Response Serializer 
+SUBDIRS=Error FileClient FileReadWriter FileServer Request Response Serializer
 SUBDIRS_CLEAN=$(patsubst %, %.clean, $(SUBDIRS))
 
-$(SUBDIRS):
+.PHONY: $(SUBDIRS) $(SUBDIRS_CLEAN) clean
+
+$(SUBDIRS): 
 	$(MAKE) -C $(patsubst %,%, $@)
 
 $(SUBDIRS_CLEAN):

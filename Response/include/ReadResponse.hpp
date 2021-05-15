@@ -1,6 +1,6 @@
 #pragma once
 #include <Response.hpp>
-
+#include <RequestConstants.hpp>
 
 namespace response {
 
@@ -8,13 +8,15 @@ namespace response {
     class ReadResponse : public Response
     {
 
-    private:
-        int numberOfBytesRead;
-
     public:
 
-        ReadResponse(int fd, int numberOfBytesRead): Response(fd), numberOfBytesRead(numberOfBytesRead) {
+        int numberOfBytesRead;
+        char data[MAX_BUFFER_SIZE];
+
+        ReadResponse(int fd, int numberOfBytesRead, char * data, ResponseStatus::Type status = ResponseStatus::OK): Response(fd), numberOfBytesRead(numberOfBytesRead) {
             responseType = ResponseType::READ;
+            this->status = status;
+            strlcpy(this->data, data, sizeof(this->data));
         }
 
         ReadResponse(int fd): Response(fd) {
@@ -26,9 +28,11 @@ namespace response {
 
         int getResponseBodySize() const override;
 
-        void deserializeResponse(unsigned char *buffer) override;
+        void deserializeResponseBody(unsigned char *buffer) override;
 
-        unsigned char * serializeResponse(unsigned char *buffer) override;
+        unsigned char * serializeResponseBody(unsigned char *buffer) override;
+
+        std::string GetBody() const override;
 
     };
 

@@ -2,11 +2,11 @@
 
 using namespace request;
 
-int WriteRequest::getRequestSize() const {
+int WriteRequest::getRequestBodySize() const {
     return sizeof(offset) + sizeof(numberOfBytesToWrite) + strlen(data) + 1 + strlen(filepath) + 1 ; 
 }
 
-void WriteRequest::deserializeRequest(unsigned char *buffer){
+void WriteRequest::deserializeRequestBody(unsigned char *buffer){
     
     header->deserializeRequestHeader(buffer);
 
@@ -17,7 +17,7 @@ void WriteRequest::deserializeRequest(unsigned char *buffer){
 
 }
 
-unsigned char * WriteRequest::serializeRequest(unsigned char *buffer){
+unsigned char * WriteRequest::serializeRequestBody(unsigned char *buffer){
     
     buffer = header->serializeRequestHeader(buffer);
     
@@ -27,6 +27,9 @@ unsigned char * WriteRequest::serializeRequest(unsigned char *buffer){
     buffer = serialize_char_array(buffer, data);
 
     return buffer; 
-    
   
+}
+
+std::string WriteRequest::GetBody() const {
+    return "{ }";
 }

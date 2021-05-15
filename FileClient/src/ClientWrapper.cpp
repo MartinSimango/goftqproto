@@ -10,8 +10,8 @@ FileClient* AsFileClient(void* fc) {
 }
 
 
-void* NewFileClient(int mode, char * requestFileName, char * filename) {
-    FileClient * fc = new FileClient(mode, requestFileName, filename);
+void* NewFileClient() {
+    FileClient * fc = new FileClient();
     return fc;
 }
 
@@ -21,37 +21,48 @@ void DestroyFileClient(void* fc){
 
 // Connect connects the client to the specific server specified by the ServerPort 
 // returns false if connect failed and errorMessage is set
-void * Connect(void* fc, char * serverAddress, int port, bool create) {
+void * Connect(void* fc, char * serverAddress, int port) {
     struct ServerPort serverPort;
     serverPort.port = port;
     strncpy(serverPort.serverAddress, serverAddress, sizeof(serverPort.serverAddress));
     
-    Error<void,FileClient,ServerPort, bool> * error = new Error<void, FileClient, ServerPort, bool>(&FileClient::Connect, AsFileClient(fc));
-    error->Execute(serverPort, create);
+    Error<void, FileClient,ServerPort> * error = new Error<void, FileClient, ServerPort>(&FileClient::Connect, AsFileClient(fc));
+    error->Execute(serverPort);
 
     return dynamic_cast<ErrorBase*>(error);
 }
 
+void * SendCreateRequest(void* fc, char ** filename, int * filesize, int numFiles){
 
+}
 
-// Process either reads or writes to the server depending on what mode the FileClient is in
-// returns the number of bits written or read to the server depending on the mode
-void* Process(void* fc, int offset, int numberOfBytesRead){
-    Error<int, FileClient, int, int> * error = new Error<int, FileClient, int, int>(&FileClient::Process, AsFileClient(fc));
-    error->Execute(offset, numberOfBytesRead);
+void * SendGetRequest(void* fc, char * filepath) {
+    Error<GetResponse, FileClient, char *> * error = new Error<GetResponse, FileClient, char *>(&FileClient::SendGetRequest, AsFileClient(fc));
+    error->Execute(filepath);
+
     return dynamic_cast<ErrorBase*>(error);
 }
 
-void * GetFileClientFileSize(void *fc) {
-    Error<int, FileClient> * error = new Error<int, FileClient>(&FileClient::GetFileSize, AsFileClient(fc));
-    error->Execute();
+void * SendReadRequest(void* fc, int numberOfBytesToRead, int offset, char *readFile, char * writeFile){
+    Error<ReadResponse, FileClient, int,int,char *, char*> * error = new Error<ReadResponse, FileClient,int,int, char *, char*>(&FileClient::SendReadRequest, AsFileClient(fc));
+    error->Execute(numberOfBytesToRead, offset, readFile, writeFile);
+
     return dynamic_cast<ErrorBase*>(error);
 }
+
+void * SendWriteRequest(void* fc, int numberOfBytesToWrite, int offset, char *readFile, char * writeFile){
+    Error<WriteResponse, FileClient, int,int,char *, char*> * error = new Error<WriteResponse, FileClient,int,int, char *, char*>(&FileClient::SendWriteRequest, AsFileClient(fc));
+    error->Execute(numberOfBytesToWrite, offset, readFile, writeFile);
+
+    return dynamic_cast<ErrorBase*>(error);
+}
+
 
 // CloseFileClient closes the connection to the server, returns false upon failure
 void * CloseFileClient(void* fc){
     Error<void, FileClient> * error = new Error<void, FileClient>(&FileClient::Close, AsFileClient(fc)); 
     error->Execute();
+    
     return dynamic_cast<ErrorBase*>(error);
 }
 
