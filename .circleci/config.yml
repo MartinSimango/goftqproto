@@ -14,6 +14,15 @@ jobs:
           apk update && apk add --no-cache git
           apk add build-base
           make clean install
+      #log into docker
+      - run: |
+        echo "$DOCKER_PASS" | docker login --username martinsimango --password-stdin
+      # build the application image
+      - run: make docker-build-x86_64
+
+     # deploy the image
+      - run: make docker-push-x86_64
+
   # test:
   #   working_directory: ~/circleci-python
   #   docker:
