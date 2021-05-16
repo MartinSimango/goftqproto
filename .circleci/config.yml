@@ -5,9 +5,9 @@ jobs:
     working_directory: ~/filecopier
     # docker:
     #   - image: "golang:1.16-alpine"
-     machine:
-       image: ubuntu-2004:202101-01
-       resource_class: arm.medium
+    machine:
+      image: ubuntu-2004:202101-01
+      resource_class: arm.medium
     steps:
       - checkout
       - run: |
