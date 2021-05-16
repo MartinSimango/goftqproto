@@ -16,7 +16,7 @@ namespace request {
                  numberOfBytesToRead = MAX_BUFFER_SIZE;
             }
 
-            strlcpy(this->filename, filename, sizeof(this->filename));
+            strncpy(this->filename, filename, sizeof(this->filename));
             requestType = RequestType::READ;
             this->offset = offset;
             this->numberOfBytesToRead = numberOfBytesToRead;

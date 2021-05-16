@@ -54,7 +54,7 @@ namespace frw {
     public:
 
         FileReadWriter(char * filename, Mode::Type mode): mode(mode), opened(false){
-            strlcpy(this->filename, filename ,sizeof(this->filename));
+            strncpy(this->filename, filename ,sizeof(this->filename));
         }
 
         ~FileReadWriter(){}

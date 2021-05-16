@@ -19,7 +19,7 @@ namespace request {
         }
 
         void setFileName(char * filename){
-            strlcpy(this->filename, filename, sizeof(this->filename));
+            strncpy(this->filename, filename, sizeof(this->filename));
         }
 
         void deserializeRequestFile(unsigned char *buffer){

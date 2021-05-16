@@ -16,7 +16,7 @@ namespace response {
         ReadResponse(int fd, int numberOfBytesRead, char * data, ResponseStatus::Type status = ResponseStatus::OK): Response(fd), numberOfBytesRead(numberOfBytesRead) {
             responseType = ResponseType::READ;
             this->status = status;
-            strlcpy(this->data, data, sizeof(this->data));
+            strncpy(this->data, data, sizeof(this->data));
         }
 
         ReadResponse(int fd): Response(fd) {

@@ -17,9 +17,9 @@ namespace request {
                  numberOfBytesToWrite = MAX_BUFFER_SIZE;
             }
 
-            strlcpy(this->data, data, sizeof(this->data));
+            strncpy(this->data, data, sizeof(this->data));
 
-            strlcpy(this->filepath, filepath, sizeof(this->filepath));
+            strncpy(this->filepath, filepath, sizeof(this->filepath));
 
             requestType = RequestType::READ;
             this->offset = offset;

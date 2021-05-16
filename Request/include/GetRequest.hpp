@@ -17,7 +17,7 @@ namespace request {
         }
         GetRequest(int fd, char* filepath): Request(fd) {
             requestType = RequestType::GET;
-            strlcpy(this->filepath, filepath, sizeof(this->filepath));
+            strncpy(this->filepath, filepath, sizeof(this->filepath));
         }
 
         ~GetRequest(){}
