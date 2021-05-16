@@ -11,8 +11,8 @@ jobs:
     steps:
       - checkout
       - run: |
-          snap install go
-          make clean install
+          sudo snap install go
+          sudo make clean install
       #log into docker
       - run: |
           echo "$DOCKER_PASS" | docker login --username martinsimango --password-stdin
