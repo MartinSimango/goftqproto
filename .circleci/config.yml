@@ -10,7 +10,7 @@ jobs:
     # resource_class: arm.medium
     steps:
       - checkout
-      - run: sudo make clean install
+      - run: make clean install
   # test:
   #   working_directory: ~/circleci-python
   #   docker:
