@@ -15,7 +15,7 @@ jobs:
           sudo make clean install
       #log into docker
       - run: |
-          echo "$DOCKER_PASS" | docker login --username martinsimango --password-stdin
+          docker login --username martinsimango --password $DOCKER_PASS
       # build the application image
       - run: make docker-build-arm
 
