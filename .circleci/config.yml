@@ -1,5 +1,10 @@
 version: 2.1
 
+workflows:
+  test-env-vars:
+    jobs:
+      - build:
+          context: DOCKER
 jobs:
   build:
     working_directory: ~/filecopier
@@ -30,10 +35,11 @@ jobs:
   #     - checkout
   #     - run: python3 main-test.py
 
-workflows:
-  build_and_test:
-    jobs:
-      - build
-      # - test:
+# workflows:
+#   build_and_test:
+#     jobs:
+#       - build
+#          context: DOCKER
+#       # - test:
       #     requires:
       #       - build
