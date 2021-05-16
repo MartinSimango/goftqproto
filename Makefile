@@ -35,8 +35,8 @@ run: install
 
 # --- Docker related ---
 docker-build-arm:
-	docker build -t martinsimango/filecopierbase:ARM_latest.
-	docker build -f go-server/Dockerfile_ARM -t martinsimango/gocpserver:ARM_latest.
+	docker build -t martinsimango/filecopierbase:ARM_latest .
+	docker build -f go-server/Dockerfile_ARM -t martinsimango/gocpserver:ARM_latest .
 
 docker-build-x86_64:
 	docker build -t martinsimango/filecopierbase:x86_64_latest .
