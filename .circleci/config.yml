@@ -9,8 +9,8 @@ jobs:
       image: ubuntu-2004:202101-01
     resource_class: arm.medium
     steps:
-      # - checkout
-      - run: ls && make clean install
+      - checkout
+      - run: sudo make clean install
   # test:
   #   working_directory: ~/circleci-python
   #   docker:
