@@ -26,7 +26,6 @@ void * Connect(void* fc, char * serverAddress, int port) {
     struct ServerPort serverPort;
     serverPort.port = port;
     strncpy(serverPort.serverAddress, serverAddress, sizeof(serverPort.serverAddress));
-    
     Error<void, FileClient,ServerPort> * error = new Error<void, FileClient, ServerPort>(&FileClient::Connect, AsFileClient(fc));
     error->Execute(serverPort);
     return dynamic_cast<ErrorBase*>(error);
