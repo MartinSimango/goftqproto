@@ -3,10 +3,12 @@ version: 2.1
 workflows:
   test-env-vars:
     jobs:
-      - build:
+      - build-arm:
+          context: DOCKER
+      - build-x86_64:
           context: DOCKER
 jobs:
-  build:
+  build-arm:
     working_directory: ~/filecopier
     # docker:
     #   - image: "golang:1.16-alpine"
@@ -17,7 +19,6 @@ jobs:
       - checkout
       - run: |
           sudo snap install go --classic
-          # sudo make clean install
       #log into docker
       - run: |
           docker login --username martinsimango --password $DOCKER_PASS
@@ -26,6 +27,27 @@ jobs:
 
      # deploy the image
       - run: make docker-push-arm
+
+  build-x86_64:
+    working_directory: ~/filecopier
+    # docker:
+    #   - image: "golang:1.16-alpine"
+    machine:
+      image: ubuntu-2004:202101-01
+      resource_class: medium
+    steps:
+      - checkout
+      - run: |
+          sudo snap install go --classic
+      #log into docker
+      - run: |
+          docker login --username martinsimango --password $DOCKER_PASS
+      # build the application image
+      - run: make docker-build-x86_64
+
+     # deploy the image
+      - run: make docker-push-x86_64
+    
 
   # test:
   #   working_directory: ~/circleci-python
