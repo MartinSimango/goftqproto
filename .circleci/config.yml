@@ -17,7 +17,7 @@ jobs:
       - checkout
       - run: |
           sudo snap install go --classic
-          sudo make clean install
+          # sudo make clean install
       #log into docker
       - run: |
           docker login --username martinsimango --password $DOCKER_PASS
