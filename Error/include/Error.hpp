@@ -54,7 +54,7 @@ class Error: public Delegate<RetVal, Args...>, public ErrorBase {
 
 
     ~Error() {
-        delete errorMessage
+        delete errorMessage;
         delete reinterpret_cast<RetVal*>(retVal);
         errorMessage = NULL;
     }
