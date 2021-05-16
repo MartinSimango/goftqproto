@@ -11,7 +11,7 @@ jobs:
     steps:
       - checkout
       - run: |
-          sudo snap install go
+          sudo snap install go --classic
           sudo make clean install
       #log into docker
       - run: |
