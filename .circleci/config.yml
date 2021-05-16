@@ -10,7 +10,10 @@ jobs:
     # resource_class: arm.medium
     steps:
       - checkout
-      - run: make clean install
+      - run: |
+          apk update && apk add --no-cache git
+          make clean install
+          apk add build-base
   # test:
   #   working_directory: ~/circleci-python
   #   docker:
