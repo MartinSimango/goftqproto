@@ -16,7 +16,7 @@ jobs:
           make clean install
       #log into docker
       - run: |
-        echo "$DOCKER_PASS" | docker login --username martinsimango --password-stdin
+          echo "$DOCKER_PASS" | docker login --username martinsimango --password-stdin
       # build the application image
       - run: make docker-build-x86_64
 
