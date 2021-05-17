@@ -20,6 +20,8 @@ char * GetFuncReturnValue_String(void *err);
 
 double GetFuncReturnValue_Double(void *err);
 
+void* GetFuncReturnValue_CreateResponseStruct(void * err);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

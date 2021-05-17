@@ -15,7 +15,7 @@ void GetResponse::deserializeResponseBody(unsigned char *buffer){
     deserialize_int_big_endian(buffer, &numFiles);
 
     for (int i = 0; i < numFiles; i++) {
-        files->at(i).deserializeRequestFile(buffer);
+        buffer = files->at(i).deserializeRequestFile(buffer);
     }
 }
 

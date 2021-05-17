@@ -3,9 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <Request.hpp>
-
-#define MAX_FILEPATH_LENGTH 100
-
+#include <FileReadWriterConstants.h>
 
 namespace request {
 
@@ -22,19 +20,16 @@ namespace request {
             strncpy(this->filename, filename, sizeof(this->filename));
         }
 
-        void deserializeRequestFile(unsigned char *buffer){
+        unsigned char * deserializeRequestFile(unsigned char *buffer){
             buffer = deserialize_char_array(buffer, filename);
             buffer = deserialize_int_big_endian(buffer, &fileSize); 
-                std::cout << "NUMBER: asf " << filename << " " << fileSize << std::endl;
+            return buffer;
 
         }
 
         unsigned char * serializeRequestFile(unsigned char *buffer) {
             buffer = serialize_char_array(buffer, filename);
             buffer = serialize_int_big_endian(buffer, fileSize);
-                            std::cout << "NUMBER: asf " << filename << " " << fileSize << std::endl;
-
-
             return buffer;
         }
 

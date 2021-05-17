@@ -3,7 +3,7 @@ package server
 import (
 	"unsafe"
 
-	"github.com/MartinSimango/FileCopier/go-error/cerror"
+	"github.com/MartinSimango/FileCopier/go-utils/cerror"
 )
 
 // #cgo CFLAGS:  -I${SRCDIR}/../../FileServer/include -I../../FilePacket/include -I../../include

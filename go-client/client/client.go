@@ -1,13 +1,13 @@
 package client
 
 import (
-	"fmt"
 	"unsafe"
 
-	"github.com/MartinSimango/FileCopier/go-error/cerror"
+	"github.com/MartinSimango/FileCopier/go-utils/cerror"
+	"github.com/MartinSimango/FileCopier/go-utils/response"
 )
 
-// #cgo CFLAGS:  -I${SRCDIR}/../../FileClient/include -I../../FilePacket/include -I../../Error/include
+// #cgo CFLAGS:  -I${SRCDIR}/../../FileClient/include -I../../Error/include
 // #cgo LDFLAGS: -L${SRCDIR}/../../FileClient/lib -lgocpclient
 // #include "ClientWrapper.h"
 // #include "ErrorWrapper.h"
@@ -18,7 +18,7 @@ const WRITE = int(C.WRITE_MODE)
 
 type FileClient interface {
 	Connect(address string, port int) cerror.CError
-	SendCreateRequest(filenames []string, fileSizes []int) cerror.CError
+	SendCreateRequest(filenames []string, fileSizes []int) (*response.CreateResponseImpl, cerror.CError)
 	SendGetRequest(filepath string) cerror.CError
 	SendReadRequest(numberOfBytesToRead, offset int, readFile, writeFile string) cerror.CError
 	SendWriteRequest(numberOfBytesToWrite, offset int, readFile, writeFile string) cerror.CError
@@ -52,13 +52,11 @@ func (fc FileClientImpl) Connect(address string, port int) cerror.CError {
 	cerr.Free()
 	return nil
 }
-func (fc FileClientImpl) SendCreateRequest(filenames []string, fileSizes []int) cerror.CError {
+func (fc FileClientImpl) SendCreateRequest(filenames []string, fileSizes []int) (*response.CreateResponseImpl, cerror.CError) {
 
 	var CFilenames []*C.char
 	var CFileSizes []C.int
 	var numFiles int = len(filenames)
-
-	fmt.Println(numFiles)
 
 	cerr := cerror.CErrorImpl{}
 	for i := 0; i < numFiles; i++ {
@@ -69,11 +67,16 @@ func (fc FileClientImpl) SendCreateRequest(filenames []string, fileSizes []int) 
 	cerr.Ptr = C.SendCreateRequest(fc.ptr, &CFilenames[0], &CFileSizes[0], C.int(numFiles))
 	errorMessage := cerr.GetErrorMessage()
 	if errorMessage != nil {
-		return cerr
+		return nil, cerr
 	}
+	var cr = response.CreateResponseImpl{}
+	cr.Ptr = cerr.GetFuncReturnValue().(unsafe.Pointer)
+
+	cr.SetCreateResponse()
 	cerr.Free()
-	return nil
+	return &cr, nil
 }
+
 func (fc FileClientImpl) SendGetRequest(filepath string) cerror.CError {
 	cerr := cerror.CErrorImpl{}
 	cerr.Ptr = C.SendGetRequest(fc.ptr, C.CString(filepath))

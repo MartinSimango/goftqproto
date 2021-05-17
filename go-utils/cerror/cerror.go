@@ -5,7 +5,7 @@ import (
 )
 
 // #cgo CFLAGS:  -I${SRCDIR}/../../FileClient/include -I../../FilePacket/include -I../../Error/include
-// #cgo LDFLAGS: -L${SRCDIR}/../../FileClient/lib -lgocpclient
+// #cgo LDFLAGS: -L${SRCDIR}/../../Error/lib -lgoerror
 // #include "ErrorWrapper.h"
 import "C"
 
@@ -54,6 +54,8 @@ func (ce CErrorImpl) GetFuncReturnValue() interface{} {
 		return C.GoString(C.GetFuncReturnValue_String(ce.Ptr))
 	case int(C.DOUBLE_TYPE):
 		return float64(C.GetFuncReturnValue_Double(ce.Ptr))
+	case int(C.CREATE_RESPONSE_TYPE):
+		return C.GetFuncReturnValue_CreateResponseStruct(ce.Ptr)
 	}
 	return nil
 }

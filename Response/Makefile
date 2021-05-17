@@ -5,7 +5,7 @@ ODIR=obj
 LDIR=lib
 SDIR=src
 CFLAGS=$(patsubst %, -I%, $(IDIR)) -std=c++17
-LIBNAME=libgoreponse
+LIBNAME=libgoresponse
 
 
 RESPONSE_SOURCES=$(wildcard $(SDIR)/*.cpp)

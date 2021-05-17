@@ -72,8 +72,10 @@ namespace fts {
                         file.fileSize = request->files->at(i).fileSize;
 
                         ResponseStatus::Type status = FileReadWriter::CheckFile(file.filename, Mode::WRITE);
+
                         if (status == ResponseStatus::OK) {
                             FileReadWriter::CreateFile(file.filename, file.fileSize); 
+
                             filesCreated->push_back(file);
                         }
                         else {

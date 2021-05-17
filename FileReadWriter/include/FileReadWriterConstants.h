@@ -1,6 +1,6 @@
 #pragma once
 
-#define MAX_FILEPATH_LENGTH 100
+#define MAX_FILEPATH_LENGTH 255
 
 namespace Mode {
     enum Type {

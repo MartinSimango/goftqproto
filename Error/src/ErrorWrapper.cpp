@@ -3,7 +3,6 @@
 #include <Error.hpp>
 #include <stdio.h>
 
-
 ErrorBase* AsError(void* err) { 
     return reinterpret_cast<ErrorBase*>(err); 
 }
@@ -36,11 +35,11 @@ double GetFuncReturnValue_Double(void *err) {
     return *AsError(err)->getFunctionReturnValue<double>();
 }
 
-// ADD custom classes here...
+void* GetFuncReturnValue_CreateResponseStruct(void * err) {
+   return AsError(err)->getFunctionReturnValue<CreateResponseStruct>();
+}
 
-// void * GetFuncReturnValue_Ptr(void *err,int class_num){
-//     return AsError(err)->getFunctionReturnValue<void *>();
-// }
+
 
 
 

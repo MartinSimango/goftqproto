@@ -34,7 +34,6 @@ int RequestHeader::Read() {
         throw new RequestException(FAILED_TO_READ_REQUEST_HEADER, this->requestType);
     }
     deserializeRequestHeader(buffer);
-    std::cout << "SIZE: "<< bytes_read  << " " << requestType << std::endl;
 
     return bytes_read;
 }

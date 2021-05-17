@@ -44,7 +44,6 @@ bool FileServer::HandleClientRequest() {
     if (header->Read() == 0) { //read nothing from the client then close the connection with it
          return false;
     }
-    std::cout << "HERE " << header->getRequestBodySize() << std::endl;
     switch (header->requestType) {
         case RequestType::CREATE: {
             CreateRequest *request = new CreateRequest(connfd, header);

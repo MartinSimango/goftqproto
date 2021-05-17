@@ -16,7 +16,7 @@ void CreateRequest::deserializeRequestBody(unsigned char *buffer){
     delete this->files;
     files = new std::vector<request::File>(numFiles);
     for (int i = 0; i < numFiles; i++) {
-        files->at(i).deserializeRequestFile(buffer);
+        buffer = files->at(i).deserializeRequestFile(buffer);
     }
 }
 

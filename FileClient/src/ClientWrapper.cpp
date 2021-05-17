@@ -38,9 +38,8 @@ void * SendCreateRequest(void* fc, char * filenames[], int fileSizes[], int numF
         files->at(i).fileSize = fileSizes[i];
     }
 
-    Error<CreateResponse, FileClient, std::vector<request::File>* > * error = new Error<CreateResponse, FileClient, std::vector<request::File>*>(&FileClient::SendCreateRequest, AsFileClient(fc));
+    Error<CreateResponseStruct, FileClient, std::vector<request::File>* > * error = new Error<CreateResponseStruct, FileClient, std::vector<request::File>*>(&FileClient::SendCreateRequest, AsFileClient(fc));
     error->Execute(files);
-
     return dynamic_cast<ErrorBase*>(error);
 
 }
@@ -48,7 +47,6 @@ void * SendCreateRequest(void* fc, char * filenames[], int fileSizes[], int numF
 void * SendGetRequest(void* fc, char * filepath) {
     Error<GetResponse, FileClient, char *> * error = new Error<GetResponse, FileClient, char *>(&FileClient::SendGetRequest, AsFileClient(fc));
     error->Execute(filepath);
-
     return dynamic_cast<ErrorBase*>(error);
 }
 

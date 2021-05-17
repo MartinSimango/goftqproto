@@ -30,21 +30,25 @@ func main() {
 
 	fmt.Println("[Client...] " + "Processing...")
 
-	// files := []string{"/Users/martinsimango/filecopier/Testers/File_2.txt"}
-	// fileSize := []int{30}
+	files := []string{"/Users/martinsimango/filecopier/Testers/File_2.txt", "a"}
+	fileSize := []int{30, 20}
 
-	// fmt.Println(len(("/Users/martinsimango/filecopier/Testers/File_2.txt")))
+	fmt.Println(len(("/Users/martinsimango/filecopier/Testers/File_2.txt")))
 
-	// // cerr = fc.SendCreateRequest(files, fileSize)
+	response, cerr := fc.SendCreateRequest(files, fileSize)
 
-	// // if cerr != nil {
-	// // 	fmt.Println(cerr.Error())
-	// // 	os.Exit(1)
-	// // }
+	if cerr != nil {
+		fmt.Println(cerr.Error())
+		os.Exit(1)
+	}
+
+	fmt.Println("Recieved from server: ....")
+	fmt.Println(response.Filenames)
+	fmt.Println(response.FileSizes)
+	fmt.Println(response.NumFiles)
+
+	response.Free()
 
 	fmt.Println("[Client...] " + "Program Done!!!")
-	for {
-
-	}
 
 }

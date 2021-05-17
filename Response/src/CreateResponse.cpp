@@ -17,7 +17,7 @@ void CreateResponse::deserializeResponseBody(unsigned char *buffer){
     files = new std::vector<request::File>(numFiles);
     
     for (int i = 0; i < numFiles; i++) {
-        files->at(i).deserializeRequestFile(buffer);
+        buffer = files->at(i).deserializeRequestFile(buffer);
     }
 }
 

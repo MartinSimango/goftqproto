@@ -6,3 +6,4 @@
 #include <WriteResponse.hpp>
 #include <ResponseException.hpp>
 #include <ResponseConstants.hpp>
+#include <ResponseWrapper.h>

@@ -24,20 +24,28 @@ GetResponse FileClient::SendGetRequest(char * filepath){
     return response;
 }
 
-CreateResponse FileClient::SendCreateRequest(std::vector<request::File> * files) {
+CreateResponseStruct FileClient::SendCreateRequest(std::vector<request::File> * files) {
     if (!isConnected)
         throw new ClientException(CLIENT_NOT_CONNECTED);
 
     CreateRequest request(sockfd, files);
     CreateResponse response(sockfd);
+    CreateResponseStruct createResponse;
 
     request.Write();
     response.Read();
 
-    std::cout << "FILENUM?: frepposne" << response.numFiles << std::endl;
+    createResponse.numFiles = response.numFiles;
+    createResponse.fileSizes = new int[response.numFiles];
+    createResponse.filenames = new char*[response.numFiles];
 
-    //todo rather call Read within the response constructor in order to not expose the read method one the response is returned
-    return response;
+    for (int i =0; i< response.numFiles;i++) {
+        createResponse.filenames[i] = new char[MAX_FILEPATH_LENGTH];
+        strncpy(createResponse.filenames[i],response.files->at(i).filename, MAX_FILEPATH_LENGTH);
+        createResponse.fileSizes[i] = response.files->at(i).fileSize;
+    }
+    
+    return createResponse;
 }
 
 ReadResponse FileClient::SendReadRequest(int numberOfBytesToRead, int offset, char *readFile, char * writeFile) {

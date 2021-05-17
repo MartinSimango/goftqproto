@@ -7,6 +7,7 @@
 #include <Delegate.hpp>
 #include <ErrorBase.hpp>
 #include <Exception.hpp>
+#include <ResponseWrapper.h>
 
 //TODO add support for const functions
 
@@ -38,7 +39,9 @@ class Error: public Delegate<RetVal, Args...>, public ErrorBase {
             else if (std::is_same<RetVal, double>::value) {
                 funcReturnType = DOUBLE_TYPE;
             }
-            
+            else if (std::is_same<RetVal, CreateResponseStruct>::value) {
+                funcReturnType = CREATE_RESPONSE_TYPE;
+            }
             else {
                 funcReturnType = PTR_TYPE;
             }

@@ -30,7 +30,9 @@ namespace response {
         }
 
 
-        ~CreateResponse(){}
+        ~CreateResponse(){
+            delete this->files;
+        }
 
         int getResponseBodySize() const override;
 
