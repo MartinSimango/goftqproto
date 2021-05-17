@@ -1,7 +1,7 @@
 package response
 
 // #cgo CFLAGS: -I../../Response/include
-// #cgo LDFLAGS: -L${SRCDIR}/../../Response/lib -lgoreponse
+// #cgo LDFLAGS: -L${SRCDIR}/../../Response/lib -lgoresponse
 // #include "ResponseWrapper.h"
 import "C"
 import (
