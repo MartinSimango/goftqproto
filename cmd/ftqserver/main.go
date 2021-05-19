@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/MartinSimango/FileCopier/pkg/server"
+	"github.com/MartinSimango/goftqproto/pkg/server"
 )
 
 func main() {

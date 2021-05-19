@@ -1,5 +1,5 @@
-module github.com/MartinSimango/FileCopier
+module github.com/MartinSimango/goftqproto
 
 go 1.16
 
-require github.com/MartinSimango/cerror v0.0.0-20210518210759-631216d50e74 // indirect
+require github.com/MartinSimango/cerror v0.0.0-20210519001443-74871b1e346e

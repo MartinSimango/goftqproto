@@ -3,11 +3,11 @@ RUN apk update && apk add --no-cache git
 RUN apk add build-base
 
 #intall dependencies
-RUN git clone https://github.com/MartinSimango/GoCPPError.git && cd GoCPPError
-RUN make clean build install && cd ..
+RUN git clone https://github.com/MartinSimango/GoCPPError.git
+RUN cd GoCPPError && make clean build install-docker && cd ..
 
-RUN git clone https://github.com/MartinSimango/ftqproto.git && cd ftqproto
-RUN make clean build install && cd ..
+RUN git clone https://github.com/MartinSimango/ftqproto.git 
+RUN cd ftqproto && make clean build install-docker && cd ..
 
 ENV GOPATH /go
 ENV GOBIN /go/bin

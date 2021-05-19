@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/MartinSimango/FileCopier/pkg/client"
+	"github.com/MartinSimango/goftqproto/pkg/client"
 )
 
 func main() {
@@ -20,7 +20,8 @@ func main() {
 		fmt.Println(cerr.Error())
 		os.Exit(1)
 	}
-	fi, err := os.Stat("/Users/martinsimango/filecopier/Testers/File.txt")
+
+	fi, err := os.Stat("/Users/martinsimango/projects/ftqproto/Testers/File.txt")
 	if err != nil {
 		os.Exit(1)
 	}
@@ -30,7 +31,7 @@ func main() {
 
 	fmt.Println("[Client...] " + "Processing...")
 
-	files := []string{"/Users/martinsimango/filecopier/Testers/File_2.txt", "a"}
+	files := []string{"/Users/martinsimango", "/Users/martinsimangt"}
 	fileSize := []int{30, 20}
 
 	fmt.Println(len(("/Users/martinsimango/filecopier/Testers/File_2.txt")))

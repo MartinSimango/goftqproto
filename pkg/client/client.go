@@ -3,8 +3,8 @@ package client
 import (
 	"unsafe"
 
-	"github.com/MartinSimango/FileCopier/internal/response"
 	"github.com/MartinSimango/cerror"
+	"github.com/MartinSimango/goftqproto/internal/response"
 )
 
 // #cgo LDFLAGS: -lgocpclient
@@ -69,7 +69,7 @@ func (fc FileClientImpl) SendCreateRequest(filenames []string, fileSizes []int) 
 		return nil, cerr
 	}
 	var res = response.CreateResponseImpl{}
-	res.Ptr = cerr.GetFuncReturnValue().(unsafe.Pointer)
+	res.Ptr = cerr.GetFuncReturnPtrValue(cerror.CREATE_RESPONSE_TYPE)
 
 	cerr.Free()
 	return res.GetCreateResponse(), nil

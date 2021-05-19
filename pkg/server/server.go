@@ -68,6 +68,7 @@ func (fs *FileServerImpl) Accept() cerror.CError {
 	return nil
 }
 
+// TODO ftq will now return a request and this will be name name GetClientRequest
 func (fs *FileServerImpl) HandleClientRequest() (bool, cerror.CError) {
 	cerr := cerror.CErrorImpl{}
 	cerr.Ptr = C.HandleClientRequest(fs.ptr)

@@ -1,2 +1,4 @@
 github.com/MartinSimango/cerror v0.0.0-20210518210759-631216d50e74 h1:c2bTZcgmpS+qCh67DCikuKlZp6otMLom2k86/7x/epI=
 github.com/MartinSimango/cerror v0.0.0-20210518210759-631216d50e74/go.mod h1:ExFaZoRH2C9dCtHmS2ZUKOpcEmBHJ++gY7T68qqpYis=
+github.com/MartinSimango/cerror v0.0.0-20210519001443-74871b1e346e h1:8LRqultBgtB0N+X3/3UqY/QnOxNUxterzH/8YL2V1Hs=
+github.com/MartinSimango/cerror v0.0.0-20210519001443-74871b1e346e/go.mod h1:ExFaZoRH2C9dCtHmS2ZUKOpcEmBHJ++gY7T68qqpYis=
