@@ -1,4 +1,4 @@
-github.com/MartinSimango/cerror v0.0.0-20210519001443-74871b1e346e h1:8LRqultBgtB0N+X3/3UqY/QnOxNUxterzH/8YL2V1Hs=
-github.com/MartinSimango/cerror v0.0.0-20210519001443-74871b1e346e/go.mod h1:ExFaZoRH2C9dCtHmS2ZUKOpcEmBHJ++gY7T68qqpYis=
-github.com/MartinSimango/cerror v0.0.0-20210519122032-c23d23384c2e h1:Zl14aYk80XHMY/TAbbO9jSY8O4S37I+2uEzq7v9BslE=
-github.com/MartinSimango/cerror v0.0.0-20210519122032-c23d23384c2e/go.mod h1:ExFaZoRH2C9dCtHmS2ZUKOpcEmBHJ++gY7T68qqpYis=
+github.com/MartinSimango/gocpperror v0.0.0-20210523175548-a8a355592ce9 h1:qDv5p+Bd4M+KYX2QSOneyDBzMW3+/Zy9BY41/3AqCMs=
+github.com/MartinSimango/gocpperror v0.0.0-20210523175548-a8a355592ce9/go.mod h1:HwWH29tjo0oKMzMOavYmpvrWkOWeSrOHGABHfoKY0RU=
+github.com/MartinSimango/gocpperror v0.0.0-20210523221343-ff46b19c5996 h1:6yQzcbYcTWMERmpn3qYiIC5zjs8OZkYFD9X3BljI138=
+github.com/MartinSimango/gocpperror v0.0.0-20210523221343-ff46b19c5996/go.mod h1:HwWH29tjo0oKMzMOavYmpvrWkOWeSrOHGABHfoKY0RU=

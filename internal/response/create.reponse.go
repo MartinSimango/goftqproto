@@ -8,7 +8,7 @@ import (
 )
 
 type CreateResponse interface {
-	GetCreateResponse() *CreateResponseImpl
+	GetResponse() *CreateResponseImpl
 	Free()
 }
 type CreateResponseImpl struct {
@@ -24,7 +24,7 @@ func (cr *CreateResponseImpl) Free() {
 	C.DestroyCreateResponse(cr.Ptr)
 }
 
-func (cr CreateResponseImpl) GetCreateResponse() *CreateResponseImpl {
+func (cr CreateResponseImpl) GetResponse() *CreateResponseImpl {
 	var response = C.GetCreateResponse(cr.Ptr)
 
 	cr.NumFiles = int(response.numFiles)

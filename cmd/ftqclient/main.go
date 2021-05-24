@@ -17,7 +17,7 @@ func main() {
 	cerr := fc.Connect("127.0.0.1", 3000)
 
 	if cerr != nil {
-		fmt.Println(cerr.Error())
+		fmt.Println(cerr)
 		os.Exit(1)
 	}
 
@@ -31,12 +31,12 @@ func main() {
 
 	fmt.Println("[Client...] " + "Processing...")
 
-	files := []string{"/Users/martinsimango", "/Users/martinsimangt"}
-	fileSize := []int{30, 20}
+	files := "/Users/martinsimangt"
+	fileSize := 30
 
 	fmt.Println(len(("/Users/martinsimango/filecopier/Testers/File_2.txt")))
 
-	response, cerr := fc.SendCreateRequest(files, fileSize)
+	response, cerr := fc.SendCreateRequest([]client.CreateRequestFile{client.CreateRequestFile{files, fileSize}})
 
 	if cerr != nil {
 		fmt.Println(cerr.Error())

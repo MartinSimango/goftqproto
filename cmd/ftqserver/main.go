@@ -26,6 +26,7 @@ func main() {
 
 	if cerr != nil {
 		fmt.Println(cerr.Error())
+		cerr.Free()
 		os.Exit(1)
 	}
 	fmt.Println("Handling requests")
@@ -36,6 +37,7 @@ func main() {
 
 		if cerr != nil {
 			fmt.Println(cerr.Error())
+			cerr.Free()
 			break
 		}
 	}
@@ -46,6 +48,7 @@ func main() {
 
 	if cerr != nil {
 		fmt.Println(cerr.Error())
+		cerr.Free()
 		os.Exit(1)
 	}
 
