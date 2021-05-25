@@ -2,3 +2,5 @@ github.com/MartinSimango/gocpperror v0.0.0-20210523175548-a8a355592ce9 h1:qDv5p+
 github.com/MartinSimango/gocpperror v0.0.0-20210523175548-a8a355592ce9/go.mod h1:HwWH29tjo0oKMzMOavYmpvrWkOWeSrOHGABHfoKY0RU=
 github.com/MartinSimango/gocpperror v0.0.0-20210523221343-ff46b19c5996 h1:6yQzcbYcTWMERmpn3qYiIC5zjs8OZkYFD9X3BljI138=
 github.com/MartinSimango/gocpperror v0.0.0-20210523221343-ff46b19c5996/go.mod h1:HwWH29tjo0oKMzMOavYmpvrWkOWeSrOHGABHfoKY0RU=
+github.com/MartinSimango/gocpperror v0.0.0-20210525004713-c3cf1b9190be h1:J7eGCOc16WoqWCcQuIeGlgFAXiHKgn6yUPURop2Uxko=
+github.com/MartinSimango/gocpperror v0.0.0-20210525004713-c3cf1b9190be/go.mod h1:HwWH29tjo0oKMzMOavYmpvrWkOWeSrOHGABHfoKY0RU=

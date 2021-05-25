@@ -7,7 +7,7 @@ import (
 )
 
 // #cgo LDFLAGS: -lgocpserver
-// #include <ServerWrapper.h>
+// #include <ftqproto/ServerWrapper.h>
 import "C"
 
 const READ = int(C.READ_MODE)

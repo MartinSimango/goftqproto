@@ -1,7 +1,7 @@
 package response
 
 // #cgo LDFLAGS: -lgoresponse
-// #include <ResponseWrapper.h>
+// #include <ftqproto/ResponseWrapper.h>
 import "C"
 import (
 	"unsafe"

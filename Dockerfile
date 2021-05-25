@@ -3,11 +3,13 @@ RUN apk update && apk add --no-cache git
 RUN apk add build-base
 
 #intall dependencies
-RUN git clone https://github.com/MartinSimango/GoCPPError.git
-RUN cd GoCPPError && make clean build install-docker && cd ..
+RUN git clone https://github.com/MartinSimango/cpperror.git
+RUN cd cpperror && make clean build-docker install-docker
+RUN rm -r cpperror
 
 RUN git clone https://github.com/MartinSimango/ftqproto.git 
-RUN cd ftqproto && make clean build install-docker && cd ..
+RUN cd ftqproto && make clean build-docker install-docker
+RUN rm -r ftqproto
 
 ENV GOPATH /go
 ENV GOBIN /go/bin
@@ -25,4 +27,4 @@ RUN go build ./...
 RUN go install ./...
 
 # get the dynamic libs that the go-server depends on and put it on a folder
-RUN ./scripts/get-go-server-libs.sh
+RUN ./scripts/get-ftqserver-libs.sh

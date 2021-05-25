@@ -4,10 +4,19 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/MartinSimango/goftqproto/internal/argloader"
 	"github.com/MartinSimango/goftqproto/pkg/client"
 )
 
+// args
 func main() {
+	loader := argloader.NewArgumentLoaderImpl()
+	cmdArgs, err := loader.LoadArgs()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	fmt.Println(*cmdArgs)
 
 	fmt.Println("[Client...] " + "Starting client...")
 
@@ -36,7 +45,7 @@ func main() {
 
 	fmt.Println(len(("/Users/martinsimango/filecopier/Testers/File_2.txt")))
 
-	response, cerr := fc.SendCreateRequest([]client.CreateRequestFile{client.CreateRequestFile{files, fileSize}})
+	response, cerr := fc.SendCreateRequest([]client.CreateRequestFile{{files, fileSize}})
 
 	if cerr != nil {
 		fmt.Println(cerr.Error())

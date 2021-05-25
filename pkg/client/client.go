@@ -4,12 +4,12 @@ import (
 	"unsafe"
 
 	cerror "github.com/MartinSimango/gocpperror"
-	"github.com/MartinSimango/goftqproto/internal/response"
+	"github.com/MartinSimango/goftqproto/pkg/response"
 )
 
 // #cgo LDFLAGS: -lgocpclient
-// #include <ClientWrapper.h>
-// #include <ErrorWrapper.h>
+// #include <ftqproto/ClientWrapper.h>
+// #include <cpperror/ErrorCustom.h>
 import "C"
 
 const READ = int(C.READ_MODE)
