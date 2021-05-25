@@ -19,6 +19,7 @@ jobs:
       - checkout
       - run: |
           sudo snap install go --classic
+          sudo apt-get install build-essential
       #log into docker
       - run: |
           docker login --username martinsimango --password $DOCKER_PASS
@@ -39,6 +40,7 @@ jobs:
       - checkout
       - run: |
           sudo snap install go --classic
+          sudo apt-get install build-essential
       #log into docker
       - run: |
           docker login --username martinsimango --password $DOCKER_PASS
