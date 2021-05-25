@@ -14,8 +14,9 @@ RUN rm -r ftqproto
 ENV GOPATH /go
 ENV GOBIN /go/bin
 ENV CGO_ENABLED 1
-WORKDIR /app
 RUN mkdir -p /go/bin
+
+WORKDIR /app
 
 COPY go.mod .
 COPY go.sum . 

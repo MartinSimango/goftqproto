@@ -10,7 +10,7 @@ install: build
 
 # --- Docker related ---
 docker-build-arm:
-	#docker build --no-cache -t martinsimango/goftqprotobase:ARM_latest .
+	docker build --no-cache -t martinsimango/goftqprotobase:ARM_latest .
 	docker build -f cmd/ftqserver/dockerfiles/ARM/Dockerfile -t martinsimango/ftqserver:ARM_latest .
 
 docker-build-x86_64:
