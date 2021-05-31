@@ -1,6 +1,4 @@
-github.com/MartinSimango/gocpperror v0.0.0-20210523175548-a8a355592ce9 h1:qDv5p+Bd4M+KYX2QSOneyDBzMW3+/Zy9BY41/3AqCMs=
-github.com/MartinSimango/gocpperror v0.0.0-20210523175548-a8a355592ce9/go.mod h1:HwWH29tjo0oKMzMOavYmpvrWkOWeSrOHGABHfoKY0RU=
-github.com/MartinSimango/gocpperror v0.0.0-20210523221343-ff46b19c5996 h1:6yQzcbYcTWMERmpn3qYiIC5zjs8OZkYFD9X3BljI138=
-github.com/MartinSimango/gocpperror v0.0.0-20210523221343-ff46b19c5996/go.mod h1:HwWH29tjo0oKMzMOavYmpvrWkOWeSrOHGABHfoKY0RU=
-github.com/MartinSimango/gocpperror v0.0.0-20210525004713-c3cf1b9190be h1:J7eGCOc16WoqWCcQuIeGlgFAXiHKgn6yUPURop2Uxko=
-github.com/MartinSimango/gocpperror v0.0.0-20210525004713-c3cf1b9190be/go.mod h1:HwWH29tjo0oKMzMOavYmpvrWkOWeSrOHGABHfoKY0RU=
+github.com/MartinSimango/gocpperror v0.0.0-20210526095644-d65fc4e00318 h1:qBJRGggjNZmO2ifdZH0d4lUYNnFuNo1vZIDScIJqNOI=
+github.com/MartinSimango/gocpperror v0.0.0-20210526095644-d65fc4e00318/go.mod h1:HwWH29tjo0oKMzMOavYmpvrWkOWeSrOHGABHfoKY0RU=
+github.com/MartinSimango/gocpperror v0.0.0-20210527222750-0ab81c467dfb h1:HDq5pTfElkaopaAVu7CPlqlUcWklh9U6cApBInxk3NU=
+github.com/MartinSimango/gocpperror v0.0.0-20210527222750-0ab81c467dfb/go.mod h1:HwWH29tjo0oKMzMOavYmpvrWkOWeSrOHGABHfoKY0RU=

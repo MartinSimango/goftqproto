@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"net"
 	"strings"
 )
 
@@ -20,7 +21,7 @@ type ArgumentLoaderImpl struct {
 //check we implement interface
 var _ ArgumentLoader = &ArgumentLoaderImpl{}
 
-//NewArgumentLoaderImpl is construct
+//NewArgumentLoaderImpl is constructor
 func NewArgumentLoaderImpl() *ArgumentLoaderImpl {
 	var loader ArgumentLoaderImpl
 	loader.init()
@@ -55,18 +56,24 @@ func (al *ArgumentLoaderImpl) LoadArgs() (*CmdArgs, error) {
 	}
 
 	source, destination := args[0], args[1]
-	server := getServer(&source, &destination)
+	server, isSourceServer, err := getServer(&source, &destination)
+
+	if err != nil {
+		return nil, err
+	}
+
 	return &CmdArgs{
 		Port:                *port,
 		SourceFilePath:      source,
 		DestinationFilePath: destination,
 		Server:              server,
+		IsSourceServer:      isSourceServer,
 	}, nil
 }
 
-func getServer(source, destination *string) string {
+func getServer(source, destination *string) (string, bool, error) {
 
-	server := "127.0.0.1"
+	server := ""
 
 	sourceColonIdx := strings.Index(*source, ":")
 	isSourceServer := sourceColonIdx > 0
@@ -82,7 +89,14 @@ func getServer(source, destination *string) string {
 
 		server = (*destination)[:destinationColonIdx]
 		*destination = (*destination)[destinationColonIdx+1:]
+	} else {
+		return server, true, nil
 	}
 
-	return server
+	ips, err := net.LookupIP(server)
+	if err != nil || len(ips) < 1 {
+		return server, isSourceServer, fmt.Errorf("Could not resolve hostname %s", server)
+	}
+	server = ips[0].To4().String()
+	return server, isSourceServer, nil
 }

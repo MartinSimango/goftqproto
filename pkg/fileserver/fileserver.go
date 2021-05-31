@@ -1,4 +1,4 @@
-package server
+package fileserver
 
 import (
 	"unsafe"
@@ -38,12 +38,12 @@ func NewFileServer(port int, rootFolder string) FileServerImpl {
 
 // Free deallocates the memory allocataed to the FileClientImpl instance
 func (fs *FileServerImpl) Free() {
+	fs.Close()
 	C.DestroyFileServer(fs.ptr)
 }
 
 func (fs *FileServerImpl) StartServer(connections int) cerror.CPPError {
-	cerr := cerror.CPPErrorImpl{}
-	cerr.Ptr = C.StartServer(fs.ptr, C.int(connections))
+	cerr := cerror.NewCPPErrorImpl(C.StartServer(fs.ptr, C.int(connections)))
 	errorMessage := cerr.GetErrorMessage()
 	if errorMessage != nil {
 		return cerr
@@ -55,8 +55,7 @@ func (fs *FileServerImpl) StartServer(connections int) cerror.CPPError {
 
 // Accepts waits and accepts a client connection
 func (fs *FileServerImpl) Accept() cerror.CPPError {
-	cerr := cerror.CPPErrorImpl{}
-	cerr.Ptr = C.Accept(fs.ptr)
+	cerr := cerror.NewCPPErrorImpl(C.Accept(fs.ptr))
 	errorMessage := cerr.GetErrorMessage()
 
 	if errorMessage != nil {
@@ -68,34 +67,31 @@ func (fs *FileServerImpl) Accept() cerror.CPPError {
 
 // TODO ftq will now return a request and this will be name name GetClientRequest
 func (fs *FileServerImpl) HandleClientRequest() (bool, cerror.CPPError) {
-	cerr := cerror.CPPErrorImpl{}
-	cerr.Ptr = C.HandleClientRequest(fs.ptr)
+	cerr := cerror.NewCPPErrorImpl(C.HandleClientRequest(fs.ptr))
 	errorMessage := cerr.GetErrorMessage()
 
 	if errorMessage != nil {
 		return false, cerr
 	}
+	defer cerr.Free()
 	retVal := cerr.GetFuncReturnValue().(bool)
-	cerr.Free()
 	return retVal, nil
 }
 
 func (fs *FileServerImpl) IsServerRunning() (bool, cerror.CPPError) {
-	cerr := cerror.CPPErrorImpl{}
-	cerr.Ptr = C.IsServerRunning(fs.ptr)
+	cerr := cerror.NewCPPErrorImpl(C.IsServerRunning(fs.ptr))
 	errorMessage := cerr.GetErrorMessage()
 	if errorMessage != nil {
 		return false, cerr
 	}
+	defer cerr.Free()
 	retVal := cerr.GetFuncReturnValue().(bool)
-	cerr.Free()
 	return retVal, nil
 }
 
 // Close closes the connection to the server, returns false upon failure
 func (fs *FileServerImpl) Close() cerror.CPPError {
-	cerr := cerror.CPPErrorImpl{}
-	cerr.Ptr = C.CloseFileServer(fs.ptr)
+	cerr := cerror.NewCPPErrorImpl(C.CloseFileServer(fs.ptr))
 	errorMessage := cerr.GetErrorMessage()
 	if errorMessage != nil {
 		return cerr

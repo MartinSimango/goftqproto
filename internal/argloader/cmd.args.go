@@ -5,4 +5,5 @@ type CmdArgs struct {
 	SourceFilePath      string
 	DestinationFilePath string
 	Server              string
+	IsSourceServer      bool
 }

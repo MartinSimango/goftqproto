@@ -1,9 +1,10 @@
-package client
+package fileclient
 
 import (
 	"unsafe"
 
 	cerror "github.com/MartinSimango/gocpperror"
+	"github.com/MartinSimango/goftqproto/pkg/request"
 	"github.com/MartinSimango/goftqproto/pkg/response"
 )
 
@@ -15,14 +16,9 @@ import "C"
 const READ = int(C.READ_MODE)
 const WRITE = int(C.WRITE_MODE)
 
-type CreateRequestFile struct {
-	FilePath string
-	FileSize int
-}
-
 type FileClient interface {
 	Connect(address string, port int) cerror.CPPError
-	SendCreateRequest(cr []CreateRequestFile) (*response.CreateResponseImpl, cerror.CPPError)
+	SendCreateRequest(cr request.CreateRequest) (*response.CreateResponseImpl, cerror.CPPError)
 	SendGetRequest(filepath string) cerror.CPPError
 	SendReadRequest(numberOfBytesToRead, offset int, readFile, writeFile string) cerror.CPPError
 	SendWriteRequest(numberOfBytesToWrite, offset int, readFile, writeFile string) cerror.CPPError
@@ -45,9 +41,8 @@ func NewFileClient() FileClientImpl {
 }
 
 // Close closes the connection to the server, returns false upon failure
-func (fc FileClientImpl) Connect(address string, port int) cerror.CPPError {
-	cerr := cerror.CPPErrorImpl{}
-	cerr.Ptr = C.Connect(fc.ptr, C.CString(address), C.int(port))
+func (fc *FileClientImpl) Connect(address string, port int) cerror.CPPError {
+	cerr := cerror.NewCPPErrorImpl(C.Connect(fc.ptr, C.CString(address), C.int(port)))
 	errorMessage := cerr.GetErrorMessage()
 
 	if errorMessage != nil {
@@ -57,34 +52,47 @@ func (fc FileClientImpl) Connect(address string, port int) cerror.CPPError {
 	return nil
 }
 
-func (fc FileClientImpl) SendCreateRequest(cr []CreateRequestFile) (*response.CreateResponseImpl, cerror.CPPError) {
+type Fp struct {
+	CFilenames []*C.char
+	CFileSizes []C.int
+	CIsDirs    []bool
+}
+
+func (fc *FileClientImpl) SendCreateRequest(cr request.CreateRequest) (*response.CreateResponseImpl, cerror.CPPError) {
 
 	var CFilenames []*C.char
 	var CFileSizes []C.int
+	var CIsDirs []C.char
 
-	var numFiles int = len(cr)
-
-	cerr := cerror.CPPErrorImpl{}
+	var numFiles int = len(cr.Request)
 
 	for i := 0; i < numFiles; i++ {
-		CFilenames = append(CFilenames, C.CString(cr[i].FilePath))
-		CFileSizes = append(CFileSizes, C.int(cr[i].FileSize))
+		CFilenames = append(CFilenames, C.CString(cr.Request[i].FilePath))
+		CFileSizes = append(CFileSizes, C.int(cr.Request[i].FileSize))
+		if cr.Request[i].IsDir {
+			CIsDirs = append(CIsDirs, C.char(1))
+		} else {
+			CIsDirs = append(CIsDirs, C.char(0))
+
+		}
+
 	}
 
-	cerr.Ptr = C.SendCreateRequest(fc.ptr, &CFilenames[0], &CFileSizes[0], C.int(numFiles))
+	cerr := cerror.NewCPPErrorImpl(C.SendCreateRequest(fc.ptr, &CFilenames[0], &CFileSizes[0], &CIsDirs[0], C.int(numFiles)))
 	errorMessage := cerr.GetErrorMessage()
 	if errorMessage != nil {
 		return nil, cerr
 	}
-	var res = response.CreateResponseImpl{}
-	res.Ptr = cerr.GetFuncReturnStructValue(uint32(C.CREATE_RESPONSE_STRUCT_TYPE))
-	cerr.Free()
-	return res.GetResponse(), nil
+	defer cerr.Free()
+
+	C_CreateResponseStructPtr := cerr.GetFuncReturnStructValue(uint32(C.CREATE_RESPONSE_STRUCT_TYPE))
+
+	return response.NewCreateResponseImpl(C_CreateResponseStructPtr), nil
+
 }
 
-func (fc FileClientImpl) SendGetRequest(filepath string) cerror.CPPError {
-	cerr := cerror.CPPErrorImpl{}
-	cerr.Ptr = C.SendGetRequest(fc.ptr, C.CString(filepath))
+func (fc *FileClientImpl) SendGetRequest(filepath string) cerror.CPPError {
+	cerr := cerror.NewCPPErrorImpl(C.SendGetRequest(fc.ptr, C.CString(filepath)))
 	errorMessage := cerr.GetErrorMessage()
 	if errorMessage != nil {
 		return cerr
@@ -92,9 +100,8 @@ func (fc FileClientImpl) SendGetRequest(filepath string) cerror.CPPError {
 	cerr.Free()
 	return nil
 }
-func (fc FileClientImpl) SendReadRequest(numberOfBytesToRead, offset int, readFile, writeFile string) cerror.CPPError {
-	cerr := cerror.CPPErrorImpl{}
-	cerr.Ptr = C.SendReadRequest(fc.ptr, C.int(numberOfBytesToRead), C.int(offset), C.CString(readFile), C.CString(writeFile))
+func (fc *FileClientImpl) SendReadRequest(numberOfBytesToRead, offset int, readFile, writeFile string) cerror.CPPError {
+	cerr := cerror.NewCPPErrorImpl(C.SendReadRequest(fc.ptr, C.int(numberOfBytesToRead), C.int(offset), C.CString(readFile), C.CString(writeFile)))
 	errorMessage := cerr.GetErrorMessage()
 	if errorMessage != nil {
 		return cerr
@@ -103,9 +110,8 @@ func (fc FileClientImpl) SendReadRequest(numberOfBytesToRead, offset int, readFi
 	return nil
 
 }
-func (fc FileClientImpl) SendWriteRequest(numberOfBytesToWrite, offset int, readFile, writeFile string) cerror.CPPError {
-	cerr := cerror.CPPErrorImpl{}
-	cerr.Ptr = C.SendWriteRequest(fc.ptr, C.int(numberOfBytesToWrite), C.int(offset), C.CString(readFile), C.CString(writeFile))
+func (fc *FileClientImpl) SendWriteRequest(numberOfBytesToWrite, offset int, readFile, writeFile string) cerror.CPPError {
+	cerr := cerror.NewCPPErrorImpl(C.SendWriteRequest(fc.ptr, C.int(numberOfBytesToWrite), C.int(offset), C.CString(readFile), C.CString(writeFile)))
 	errorMessage := cerr.GetErrorMessage()
 	if errorMessage != nil {
 		return cerr
@@ -117,8 +123,7 @@ func (fc FileClientImpl) SendWriteRequest(numberOfBytesToWrite, offset int, read
 
 // Close closes the connection to the server, returns false upon failure
 func (fc FileClientImpl) Close() cerror.CPPError {
-	cerr := cerror.CPPErrorImpl{}
-	cerr.Ptr = C.CloseFileClient(fc.ptr)
+	cerr := cerror.NewCPPErrorImpl(C.CloseFileClient(fc.ptr))
 	errorMessage := cerr.GetErrorMessage()
 	if errorMessage != nil {
 		return cerr
@@ -129,5 +134,6 @@ func (fc FileClientImpl) Close() cerror.CPPError {
 
 // Free deallocates the memory allocataed to the FileClientImpl instance
 func (fc FileClientImpl) Free() {
+	fc.Close()
 	C.DestroyFileClient(fc.ptr)
 }
