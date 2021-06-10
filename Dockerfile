@@ -2,7 +2,10 @@ FROM golang:1.16-alpine
 RUN apk update && apk add --no-cache git
 RUN apk add build-base
 
+
 #intall dependencies
+RUN mkdir -p /usr/local/include
+RUN mkdir -p /usr/local/lib
 RUN git clone https://github.com/MartinSimango/cpperror.git
 RUN cd cpperror && make clean build-docker install-docker
 RUN rm -r cpperror

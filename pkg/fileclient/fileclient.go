@@ -52,29 +52,18 @@ func (fc *FileClientImpl) Connect(address string, port int) cerror.CPPError {
 	return nil
 }
 
-type Fp struct {
-	CFilenames []*C.char
-	CFileSizes []C.int
-	CIsDirs    []bool
-}
-
 func (fc *FileClientImpl) SendCreateRequest(cr request.CreateRequest) (*response.CreateResponseImpl, cerror.CPPError) {
 
 	var CFilenames []*C.char
 	var CFileSizes []C.int
-	var CIsDirs []C.char
+	var CIsDirs []C.bool
 
 	var numFiles int = len(cr.Request)
 
 	for i := 0; i < numFiles; i++ {
 		CFilenames = append(CFilenames, C.CString(cr.Request[i].FilePath))
 		CFileSizes = append(CFileSizes, C.int(cr.Request[i].FileSize))
-		if cr.Request[i].IsDir {
-			CIsDirs = append(CIsDirs, C.char(1))
-		} else {
-			CIsDirs = append(CIsDirs, C.char(0))
-
-		}
+		CIsDirs = append(CIsDirs, C.bool(cr.Request[i].IsDir))
 
 	}
 

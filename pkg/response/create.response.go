@@ -46,23 +46,21 @@ func (cr *CreateResponseImpl) loadResponse() {
 
 	response := C.GetCreateResponse(cr.ptr)
 	cr.NumFiles = int(response.numFiles)
+
 	start_filenames := unsafe.Pointer(response.filenames)
 	start_fileSizes := unsafe.Pointer(response.fileSizes)
-	size_filenames := unsafe.Sizeof(_Cgo_ptr) //array of c pointers
-	size_fileSizes := unsafe.Sizeof(C.int(0)) // array of c ints
 	start_isDirs := unsafe.Pointer(response.isDirs)
-	size_isDirs := unsafe.Sizeof(C.char(0)) // array of c ints
+
+	c_pointer_size := unsafe.Sizeof(_Cgo_ptr)  //array of c pointers
+	c_int_size := unsafe.Sizeof(C.int(0))      // array of c ints
+	c_bool_size := unsafe.Sizeof(C.bool(true)) // array of c bool
 
 	for i := 0; i < cr.NumFiles; i++ {
-		response.filenames = (**C.char)(unsafe.Pointer(uintptr(start_filenames) + size_filenames*uintptr(i)))
-		response.fileSizes = (*C.int)(unsafe.Pointer(uintptr(start_fileSizes) + size_fileSizes*uintptr(i)))
-		response.isDirs = (*C.char)(unsafe.Pointer(uintptr(start_isDirs) + size_isDirs*uintptr(i)))
+		response.filenames = (**C.char)(unsafe.Pointer(uintptr(start_filenames) + c_pointer_size*uintptr(i)))
+		response.fileSizes = (*C.int)(unsafe.Pointer(uintptr(start_fileSizes) + c_int_size*uintptr(i)))
+		response.isDirs = (*C.bool)(unsafe.Pointer(uintptr(start_isDirs) + c_bool_size*uintptr(i)))
 		cr.Filenames = append(cr.Filenames, C.GoString(*response.filenames))
 		cr.FileSizes = append(cr.FileSizes, int(*response.fileSizes))
-		if int8(*response.isDirs) > 0 {
-			cr.IsDirs = append(cr.IsDirs, true)
-		} else {
-			cr.IsDirs = append(cr.IsDirs, false)
-		}
+		cr.IsDirs = append(cr.IsDirs, bool(*response.isDirs))
 	}
 }
